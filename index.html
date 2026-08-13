@@ -1433,4 +1433,261 @@ console.info('Family Lines V2.2 patch active');
 })();
 </script>
 
+\n<style id="v24Styles">
+.v24-version{display:inline-flex;margin-right:7px;padding:3px 7px;border-radius:999px;border:1px solid rgba(168,85,247,.45);background:rgba(124,58,237,.14);color:#d8b4fe;font-size:10px;font-weight:900;vertical-align:middle}
+.archive-danger{border-color:rgba(255,64,95,.42)!important;color:#ffc1cb!important}
+.archive-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:12px}.archive-chip{border:1px solid #49306a;background:#0d0e2a;color:#ddd4ef;border-radius:12px;padding:9px 5px;font-size:11px}.archive-chip.active{border-color:#9a55ff;box-shadow:0 0 13px rgba(154,85,255,.18)}
+.archive-card{background:linear-gradient(180deg,#12132f,#090a20);border:1px solid #49306a;border-radius:16px;padding:12px;margin-bottom:9px}.archive-card h4{margin:0 0 5px}.archive-card p{margin:3px 0;color:var(--muted);font-size:12px}.archive-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.exit-card{border-color:rgba(245,158,11,.3)!important}.exit-options{display:grid;gap:9px}.exit-options .btn{width:100%}
+@media(max-width:600px){.archive-grid{grid-template-columns:repeat(2,1fr)}}
+</style>\n\n<script id="familyLinesV24Patch">
+/* FAMILY_LINES_PATCH_V24 — أرشفة واسترجاع + خروج آمن */
+(function(){
+'use strict';
+const V24='2.4';
+const nowIsoV24=()=>new Date().toISOString();
+const activeReservationsV24=()=> (state.reservations||[]).filter(r=>r.active!==false && r.status!=='تم التفعيل');
+const archivedCustomersV24=()=> (state.customers||[]).filter(c=>c.active===false);
+const archivedReservationsV24=()=> (state.reservations||[]).filter(r=>r.active===false);
+const archivedWirelessV24=()=> (state.wireless||[]).filter(w=>w.active===false);
+const archivedRoutersV24=()=> (state.routers||[]).filter(r=>r.active===false);
+const archivedLinesV24=()=> (state.lines||[]).filter(l=>l.active===false);
+const archiveCountV24=()=>archivedCustomersV24().length+archivedReservationsV24().length+archivedWirelessV24().length+archivedRoutersV24().length+archivedLinesV24().length;
+function ensureV24Data(){
+  state.reservations=state.reservations||[];state.routers=state.routers||[];
+  state.reservations.forEach(r=>{if(r.active==null)r.active=true});
+  state.routers.forEach(r=>{if(r.active==null)r.active=true});
+  state.settings=state.settings||{};state.settings.appVersion=V24;
+  storageSet(STORAGE_KEY,JSON.stringify(state));
+}
+function archiveWhenV24(x){return x?.archivedAt?String(x.archivedAt).slice(0,10):'-'}
+function openPricesV24(){if(typeof openPrices==='function')return openPrices();if(typeof openPricesModal==='function')return openPricesModal()}
+function stampV24(){
+  const h=document.querySelector('.brand h1');
+  if(h&&!document.querySelector('#v24Badge'))h.insertAdjacentHTML('beforeend','<span id="v24Badge" class="v24-version">V2.4</span>');
+}
+
+/* ===== الحجوزات ===== */
+function archiveReservationV24(id){
+  const r=state.reservations.find(x=>x.id===id&&x.active!==false);if(!r)return;
+  if(!confirm(`إلغاء وأرشفة الحجز؟\n${r.name||'بدون اسم'} — ${r.phone}\n\nيمكن استرجاعه لاحقًا من الأرشيف.`))return;
+  commit('أرشفة حجز '+r.phone,()=>{r.active=false;r.archivedAt=nowIsoV24();r.archivedOldStatus=r.status||'جديد';r.status='ملغي'});
+  openReservations();
+}
+function restoreReservationV24(id){
+  const r=state.reservations.find(x=>x.id===id&&x.active===false);if(!r)return;
+  if(state.customers.some(c=>c.active&&c.phone===r.phone))return alert('لا يمكن استرجاع الحجز لأن الرقم موجود بالفعل كعميل نشط.');
+  if(state.reservations.some(x=>x.active!==false&&x.id!==r.id&&x.phone===r.phone))return alert('يوجد حجز نشط بنفس الرقم بالفعل.');
+  commit('استرجاع حجز '+r.phone,()=>{r.active=true;r.status=r.archivedOldStatus&&r.archivedOldStatus!=='تم التفعيل'?r.archivedOldStatus:'جديد';r.restoredAt=nowIsoV24();r.archivedAt=''});
+  openArchiveV24('reservations');
+}
+openReservations=function(){
+  const rows=activeReservationsV24().slice().reverse();
+  modal('📋 الحجوزات',`<div style="margin-bottom:10px"><button class="btn booking" onclick="openReservationModal()">+ حجز جديد</button></div><div class="cards-list">${rows.map(r=>`<div class="result-card"><div class="type">${esc(r.network)} • ${esc(r.status||'جديد')}</div><h4>${esc(r.name||'بدون اسم')} • ${esc(r.phone)}</h4><p>باقة ${esc(r.package)}GB • ${money(r.amount)} • ${esc(r.paymentStatus||statusOf(r.amount,r.paid))}</p>${r.notes?`<p>${esc(r.notes)}</p>`:''}<div class="actions"><button class="btn small" onclick="activateReservation('${r.id}')">تفعيل كعميل</button><button class="btn bad small" onclick="archiveReservationV24('${r.id}')">🗑️ إلغاء/أرشفة</button></div></div>`).join('')||'<div class="empty">لا توجد حجوزات حالية</div>'}</div>`);
+};
+window.archiveReservationV24=archiveReservationV24;window.restoreReservationV24=restoreReservationV24;
+
+/* ===== العملاء ===== */
+function archiveCustomerV24(id,returnLineId=''){
+  const c=state.customers.find(x=>x.id===id&&x.active);if(!c)return;
+  const l=customerLine(c);const freeGb=Number(c.gb||0);
+  const msg=`أرشفة العضو؟\n${customerDisplayName(c)} — ${c.phone}\n\nسيتم تحرير ${freeGb}GB ومكان واحد على ${l?l.owner:'الخط'}، وإعادة حساب التحصيل والربح تلقائيًا.\nسجل المدفوعات القديم سيظل محفوظًا.`;
+  if(!confirm(msg))return;
+  commit('أرشفة عميل '+customerRef(c),()=>{c.active=false;c.archivedAt=nowIsoV24();c.archivedFromLineId=c.lineId;c.archiveReason='إلغاء/توقف الاشتراك'});
+  if(currentCustomerId===id)currentCustomerId='';
+  if(returnLineId){showPage('lines',false);setTimeout(()=>showLine(returnLineId),30)}else showPage('customers');
+}
+function openRestoreCustomerV24(id){
+  const c=state.customers.find(x=>x.id===id&&x.active===false);if(!c)return;
+  if(state.customers.some(x=>x.active&&x.phone===c.phone))return alert('لا يمكن الاسترجاع: يوجد عميل نشط بنفس رقم العميل.');
+  const candidates=state.lines.filter(l=>l.active).filter(l=>{const m=lineMetrics(l);return m.vacancies>0&&m.remaining>=Number(c.gb||0)});
+  if(!candidates.length)return alert(`لا يوجد خط نشط فيه مكان و${num(c.gb)}GB متاحة لاسترجاع العميل.`);
+  const preferred=candidates.find(l=>l.id===c.archivedFromLineId)||candidates[0];
+  modal('استرجاع العميل',`<div class="alert good">${esc(customerDisplayName(c))} • ${esc(c.phone)} • ${num(c.gb)}GB</div><div class="field"><label>الخط الذي سيعود إليه</label><select id="restoreCustomerLine">${candidates.map(l=>{const m=lineMetrics(l);return `<option value="${l.id}" ${l.id===preferred.id?'selected':''}>${esc(l.group+' • '+l.owner+' • ****'+String(l.number).slice(-4))} • متاح ${num(m.remaining)}GB • ${m.vacancies} مكان</option>`}).join('')}</select></div>`,`<button class="btn good" onclick="restoreCustomerV24('${id}')">استرجاع</button>`);
+}
+function restoreCustomerV24(id){
+  const c=state.customers.find(x=>x.id===id&&x.active===false),lid=$('#restoreCustomerLine')?.value,l=state.lines.find(x=>x.id===lid&&x.active);if(!c||!l)return;
+  const m=lineMetrics(l);if(m.vacancies<=0||m.remaining<Number(c.gb||0))return alert('السعة أو الأماكن لم تعد كافية على الخط المختار.');
+  if(state.customers.some(x=>x.active&&x.phone===c.phone))return alert('يوجد عميل نشط بنفس الرقم.');
+  commit('استرجاع عميل '+c.phone,()=>{c.active=true;c.lineId=l.id;c.restoredAt=nowIsoV24();c.archivedAt='';c.nextRenewal=nextGroupBoundary(l.group,todayISO());c.renewal=c.nextRenewal;c.renewalStatus='غير محدد'});
+  openArchiveV24('customers');
+}
+window.archiveCustomerV24=archiveCustomerV24;window.openRestoreCustomerV24=openRestoreCustomerV24;window.restoreCustomerV24=restoreCustomerV24;
+
+const renderCustomerDetailBaseV24=renderCustomerDetail;
+renderCustomerDetail=function(){
+  renderCustomerDetailBaseV24();
+  const c=state.customers.find(x=>x.id===currentCustomerId&&x.active);if(!c)return;
+  const actions=document.querySelector('#page-customer-detail .detail-actions');
+  if(actions&&!actions.querySelector('.v24ArchiveCustomer'))actions.insertAdjacentHTML('beforeend',`<button class="btn bad v24ArchiveCustomer" onclick="archiveCustomerV24('${c.id}')">🗃️ أرشفة العضو</button>`);
+};
+
+/* ===== Air / iHome ===== */
+function archiveWirelessV24(id){
+  const w=state.wireless.find(x=>x.id===id&&x.active!==false);if(!w)return;
+  const l=state.lines.find(x=>x.id===w.lineId),i=wirelessPaymentInfo(w);
+  if(!confirm(`أرشفة ${w.type}؟\n${w.customerName} — ${w.simNumber||w.phone}\n\nستتوقف عن الدخول في التحصيل والحسابات الحالية${l?' وسيصبح الخط الأساسي متاحًا لربط شريحة أخرى':''}.\nالمتبقي الحالي: ${money(i.remaining)}`))return;
+  commit('أرشفة '+w.type+' '+w.customerName,()=>{
+    w.active=false;w.archivedAt=nowIsoV24();w.archivedFromLineId=w.lineId;w.archivedRouterId=w.routerId||'';
+    if(w.routerId){const r=state.routers.find(x=>x.id===w.routerId);if(r&&r.active!==false){r.status='متاح';r.assignedTo=''}}
+  });
+  closeModal();showPage('wireless');
+}
+function openRestoreWirelessV24(id){
+  const w=state.wireless.find(x=>x.id===id&&x.active===false);if(!w)return;
+  if(w.simNumber&&state.wireless.some(x=>x.active!==false&&x.id!==w.id&&x.simNumber===w.simNumber))return alert('رقم الشريحة مستخدم بالفعل في شريحة نشطة.');
+  const net=w.type==='iHome'?'اتصالات':'WE';
+  const lines=state.lines.filter(l=>l.active&&l.network===net&&!linkedWirelessForLine(l.id,w.id));
+  if(!lines.length)return alert('لا يوجد خط أساسي متاح لربط الشريحة به الآن.');
+  const preferred=lines.find(l=>l.id===w.archivedFromLineId)||lines[0];
+  const routers=state.routers.filter(r=>r.active!==false&&(r.status==='متاح'||r.id===w.archivedRouterId));
+  modal('استرجاع '+w.type,`<div class="alert good">${esc(w.customerName)} • ${esc(w.simNumber||w.phone)} • ${num(w.packageGb)}GB</div><div class="form-grid"><div class="field full"><label>الخط الأساسي</label><select id="restoreWirelessLine">${lines.map(l=>`<option value="${l.id}" ${l.id===preferred.id?'selected':''}>${esc(l.group+' • '+l.owner+' • ****'+String(l.number).slice(-4))}</option>`).join('')}</select></div><div class="field full"><label>الراوتر (اختياري)</label><select id="restoreWirelessRouter"><option value="">بدون راوتر</option>${routers.map(r=>`<option value="${r.id}" ${r.id===w.archivedRouterId?'selected':''}>${esc(r.code+' • '+r.type+' • '+r.status)}</option>`).join('')}</select></div></div>`,`<button class="btn good" onclick="restoreWirelessV24('${id}')">استرجاع</button>`);
+}
+function restoreWirelessV24(id){
+  const w=state.wireless.find(x=>x.id===id&&x.active===false),lid=$('#restoreWirelessLine')?.value,rid=$('#restoreWirelessRouter')?.value||'',l=state.lines.find(x=>x.id===lid&&x.active);if(!w||!l)return;
+  if(linkedWirelessForLine(l.id,w.id))return alert('الخط المختار أصبح مرتبطًا بشريحة أخرى.');
+  if(w.simNumber&&state.wireless.some(x=>x.active!==false&&x.id!==w.id&&x.simNumber===w.simNumber))return alert('رقم الشريحة مستخدم بالفعل.');
+  commit('استرجاع '+w.type+' '+w.customerName,()=>{w.active=true;w.lineId=l.id;w.routerId=rid;w.archivedAt='';w.restoredAt=nowIsoV24();w.nextRenewal=nextGroupBoundary(l.group,todayISO());w.renewalStatus='غير محدد';if(rid){const r=state.routers.find(x=>x.id===rid);if(r){r.status='مع عميل';r.assignedTo=w.id}}});
+  openArchiveV24('wireless');
+}
+window.archiveWirelessV24=archiveWirelessV24;window.openRestoreWirelessV24=openRestoreWirelessV24;window.restoreWirelessV24=restoreWirelessV24;
+
+const openWirelessModalBaseV24=openWirelessModal;
+openWirelessModal=function(id='',prefill=null){
+  const all=state.routers;const w=id?state.wireless.find(x=>x.id===id):null;
+  state.routers=all.filter(r=>r.active!==false||(w&&r.id===w.routerId));
+  try{return openWirelessModalBaseV24.apply(this,arguments)}finally{state.routers=all}
+};
+const showWirelessBaseV24=showWireless;
+showWireless=function(id){
+  const r=showWirelessBaseV24.apply(this,arguments);const w=state.wireless.find(x=>x.id===id&&x.active!==false);if(!w)return r;
+  const foot=document.querySelector('#modalRoot .modal-foot');if(foot&&!foot.querySelector('.v24ArchiveWireless'))foot.insertAdjacentHTML('beforeend',`<button class="btn bad v24ArchiveWireless" onclick="archiveWirelessV24('${id}')">🗃️ أرشفة الشريحة</button>`);return r;
+};
+refreshWirelessList=function(){
+  const q=($('#wireSearch')?.value||'').toLowerCase();const ws=state.wireless.filter(w=>w.active!==false&&(w.customerName+' '+w.address+' '+w.phone+' '+w.simNumber+' '+w.type+' '+w.packageGb).toLowerCase().includes(q));const el=$('#wirelessList');if(!el)return;
+  el.innerHTML=ws.length?ws.map(w=>{const i=wirelessPaymentInfo(w),l=state.lines.find(x=>x.id===w.lineId),r=state.routers.find(x=>x.id===w.routerId);return `<article class="customer-list-card clickable-card" onclick="showWireless('${w.id}')"><div class="member-head"><div><h3>${esc(w.customerName)}</h3><p>${esc(w.type)} • ${num(w.packageGb)}GB • ${esc(w.phone)}</p><p>مرتبط: ${esc(l?l.owner+' ****'+String(l.number).slice(-4)+' • '+l.group:'غير مرتبط')} ${r?'• راوتر '+esc(r.code):''}</p></div><span class="pill ${i.remaining?(i.status==='مدفوع جزئي'?'warn':'bad'):'good'}">${esc(i.status)}</span></div><div class="customer-quick"><span>السعر <b>${money(w.price)}</b></span><span>متبقي <b class="${i.remaining?'bad':'good'}">${money(i.remaining)}</b></span><span>التجديد <b>${esc(w.nextRenewal||'-')}</b></span></div><div class="member-actions" onclick="event.stopPropagation()"><button class="btn good small" onclick="markWirelessPaidFull('${w.id}')">✅ تم الدفع</button><button class="btn secondary small" onclick="openWirelessPaymentModal('${w.id}')">💰 دفع مبلغ</button><button class="btn renew small" onclick="recordWirelessRenewal('${w.id}')">🔄 تجديد</button><button class="btn secondary small" onclick="openWhatsAppFor('${w.phone}')">💬 واتساب</button><button class="btn secondary small" onclick="openWirelessModal('${w.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveWirelessV24('${w.id}')">🗃️ أرشفة</button></div></article>`}).join(''):'<div class="empty">لسه مفيش شرائح مسجلة — أضف أول شريحة</div>';
+};
+
+/* ===== الراوترات ===== */
+function archiveRouterV24(id){
+  const r=state.routers.find(x=>x.id===id&&x.active!==false);if(!r)return;
+  const linked=state.wireless.find(w=>w.active!==false&&w.routerId===r.id);
+  const extra=linked?`\nالراوتر مرتبط حاليًا بـ ${linked.customerName} وسيتم فك الربط تلقائيًا.`:'';
+  if(!confirm(`أرشفة الراوتر ${r.code||''}؟${extra}\nيمكن استرجاعه لاحقًا.`))return;
+  commit('أرشفة راوتر '+(r.code||''),()=>{r.active=false;r.archivedAt=nowIsoV24();r.archivedOldStatus=r.status||'متاح';r.status='مؤرشف';r.assignedTo='';if(linked)linked.routerId=''});
+  closeModal();showPage('wireless');
+}
+function restoreRouterV24(id){
+  const r=state.routers.find(x=>x.id===id&&x.active===false);if(!r)return;
+  if(state.routers.some(x=>x.active!==false&&x.id!==r.id&&x.code===r.code))return alert('يوجد راوتر نشط بنفس الكود.');
+  commit('استرجاع راوتر '+(r.code||''),()=>{r.active=true;r.status=r.archivedOldStatus==='صيانة'?'صيانة':'متاح';r.assignedTo='';r.archivedAt='';r.restoredAt=nowIsoV24()});openArchiveV24('routers');
+}
+window.archiveRouterV24=archiveRouterV24;window.restoreRouterV24=restoreRouterV24;
+const openRouterModalBaseV24=openRouterModal;
+openRouterModal=function(id=''){
+  const r=openRouterModalBaseV24.apply(this,arguments),router=id?state.routers.find(x=>x.id===id&&x.active!==false):null,foot=document.querySelector('#modalRoot .modal-foot');
+  if(router&&foot&&!foot.querySelector('.v24ArchiveRouter'))foot.insertAdjacentHTML('beforeend',`<button class="btn bad v24ArchiveRouter" onclick="archiveRouterV24('${id}')">🗃️ أرشفة الراوتر</button>`);return r;
+};
+openRoutersStat=function(){
+  const rs=(state.routers||[]).filter(r=>r.active!==false);modal('الراوترات والعهدة',`<div style="margin-bottom:10px"><button class="btn secondary" onclick="openRouterModal()">+ راوتر</button></div><div class="cards-list">${rs.map(r=>`<div class="result-card"><h4>${esc(r.code||'راوتر')}</h4><p>${esc(r.type||'')} • ${esc(r.status||'')}</p><div class="actions"><button class="btn secondary small" onclick="openRouterModal('${r.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveRouterV24('${r.id}')">🗃️ أرشفة</button></div></div>`).join('')||'<div class="empty">لا توجد راوترات نشطة</div>'}</div>`);
+};
+
+/* ===== الخطوط الأساسية ===== */
+function archiveLineV24(id){
+  const l=state.lines.find(x=>x.id===id&&x.active);if(!l)return;
+  const members=state.customers.filter(c=>c.active&&c.lineId===id),wire=state.wireless.filter(w=>w.active!==false&&w.lineId===id);
+  if(members.length||wire.length)return alert(`لا يمكن أرشفة الخط الآن.\nعليه ${members.length} عضو نشط و${wire.length} شريحة Air/iHome نشطة.\nانقلهم أو أرشفهم أولًا.`);
+  if(!confirm(`أرشفة الخط الأساسي؟\n${l.owner} — ${l.number}\n\nسيختفي من الحسابات الحالية ويمكن استرجاعه من الأرشيف.`))return;
+  commit('أرشفة خط '+l.number,()=>{l.active=false;l.archivedAt=nowIsoV24()});closeModal();showPage('lines');
+}
+function restoreLineV24(id){
+  const l=state.lines.find(x=>x.id===id&&x.active===false);if(!l)return;
+  if(state.lines.some(x=>x.active&&x.id!==l.id&&x.number===l.number))return alert('يوجد خط نشط بنفس الرقم، لذلك لا يمكن الاسترجاع.');
+  commit('استرجاع خط '+l.number,()=>{l.active=true;l.archivedAt='';l.restoredAt=nowIsoV24()});openArchiveV24('lines');
+}
+window.archiveLineV24=archiveLineV24;window.restoreLineV24=restoreLineV24;
+const showLineBaseV24=showLine;
+showLine=function(id){
+  const r=showLineBaseV24.apply(this,arguments),l=state.lines.find(x=>x.id===id&&x.active);if(!l)return r;
+  const cs=lineCustomers(id),cards=[...document.querySelectorAll('#modalRoot .member-card')];
+  cards.forEach((card,i)=>{const c=cs[i],a=card.querySelector('.member-actions');if(c&&a&&!a.querySelector('.v24ArchiveMember'))a.insertAdjacentHTML('beforeend',`<button class="btn bad small v24ArchiveMember" onclick="archiveCustomerV24('${c.id}','${id}')">🗃️ أرشفة</button>`)});
+  const foot=document.querySelector('#modalRoot .modal-foot');if(foot&&!foot.querySelector('.v24ArchiveLine'))foot.insertAdjacentHTML('beforeend',`<button class="btn bad v24ArchiveLine" onclick="archiveLineV24('${id}')">🗃️ أرشفة الخط</button>`);return r;
+};
+
+/* ===== الأرشيف الموحد ===== */
+function openArchiveV24(type='all'){
+  const groups={customers:archivedCustomersV24(),reservations:archivedReservationsV24(),wireless:archivedWirelessV24(),routers:archivedRoutersV24(),lines:archivedLinesV24()};
+  const labels={customers:'👥 أعضاء',reservations:'📋 حجوزات',wireless:'📡 Air/iHome',routers:'📶 راوترات',lines:'🏢 خطوط'};
+  const chips=`<div class="archive-grid"><button class="archive-chip ${type==='all'?'active':''}" onclick="openArchiveV24('all')">الكل<br><b>${archiveCountV24()}</b></button>${Object.keys(groups).map(k=>`<button class="archive-chip ${type===k?'active':''}" onclick="openArchiveV24('${k}')">${labels[k]}<br><b>${groups[k].length}</b></button>`).join('')}</div>`;
+  let body='';const show=k=>type==='all'||type===k;
+  if(show('customers'))body+=groups.customers.map(c=>{const l=customerLine(c);return `<div class="archive-card"><h4>👤 ${esc(customerDisplayName(c))}</h4><p>${esc(c.phone)} • ${num(c.gb)}GB • ${l?esc(l.owner+' • '+l.group):'بدون خط'} • أرشف ${archiveWhenV24(c)}</p><div class="archive-actions"><button class="btn good small" onclick="openRestoreCustomerV24('${c.id}')">↩️ استرجاع</button></div></div>`}).join('');
+  if(show('reservations'))body+=groups.reservations.map(r=>`<div class="archive-card"><h4>📋 ${esc(r.name||'بدون اسم')}</h4><p>${esc(r.phone)} • ${esc(r.network)} • ${esc(r.package)}GB • أرشف ${archiveWhenV24(r)}</p><div class="archive-actions"><button class="btn good small" onclick="restoreReservationV24('${r.id}')">↩️ استرجاع</button></div></div>`).join('');
+  if(show('wireless'))body+=groups.wireless.map(w=>`<div class="archive-card"><h4>📡 ${esc(w.type)} — ${esc(w.customerName)}</h4><p>${esc(w.simNumber||w.phone)} • ${num(w.packageGb)}GB • أرشف ${archiveWhenV24(w)}</p><div class="archive-actions"><button class="btn good small" onclick="openRestoreWirelessV24('${w.id}')">↩️ استرجاع</button></div></div>`).join('');
+  if(show('routers'))body+=groups.routers.map(r=>`<div class="archive-card"><h4>📶 ${esc(r.code||'راوتر')}</h4><p>${esc(r.type||'')} • أرشف ${archiveWhenV24(r)}</p><div class="archive-actions"><button class="btn good small" onclick="restoreRouterV24('${r.id}')">↩️ استرجاع</button></div></div>`).join('');
+  if(show('lines'))body+=groups.lines.map(l=>`<div class="archive-card"><h4>🏢 ${esc(l.owner)} • ****${esc(String(l.number).slice(-4))}</h4><p>${esc(l.group)} • ${num(l.capacityGb)}GB • أرشف ${archiveWhenV24(l)}</p><div class="archive-actions"><button class="btn good small" onclick="restoreLineV24('${l.id}')">↩️ استرجاع</button></div></div>`).join('');
+  modal('🗃️ الأرشيف',chips+(body||'<div class="empty">لا توجد عناصر مؤرشفة في هذا القسم</div>'));
+}
+window.openArchiveV24=openArchiveV24;
+
+/* ===== المزيد + الخروج الآمن ===== */
+function lastBackupTextV24(){const d=state.settings?.lastBackupAt;return d?`آخر نسخة: ${String(d).slice(0,10)}`:'لم يتم عمل نسخة احتياطية بعد'}
+function openSafeExitV24(){
+  modal('🚪 خروج آمن',`<div class="alert warn"><b>هل تريد الخروج من مدير الخطوط؟</b><br>${esc(lastBackupTextV24())}<br><br>الأفضل تنزيل نسخة احتياطية قبل الإغلاق.</div><div class="exit-options"><button class="btn good" onclick="backupAndExitV24()">💾 عمل نسخة احتياطية ثم الخروج</button><button class="btn bad" onclick="finishExitV24()">🚪 خروج بدون نسخة</button><button class="btn secondary" onclick="closeModal()">إلغاء</button></div>`);
+}
+function backupAndExitV24(){downloadBackup();setTimeout(()=>finishExitV24(),450)}
+function finishExitV24(){
+  window.__v24AllowExit=true;closeModal();toast('تم حفظ البيانات. جاري الخروج…');
+  setTimeout(()=>{try{history.back()}catch(e){}},120);
+  setTimeout(()=>{try{history.back()}catch(e){};try{window.close()}catch(e){}},320);
+  setTimeout(()=>{if(document.visibilityState==='visible')toast('يمكنك الآن إغلاق التطبيق من التطبيقات الأخيرة')},800);
+}
+window.openSafeExitV24=openSafeExitV24;window.backupAndExitV24=backupAndExitV24;window.finishExitV24=finishExitV24;
+
+renderMore=function(){
+  const res=activeReservationsV24(),receipts=state.receipts||[],arc=archiveCountV24();
+  $('#page-more').innerHTML=`<div class="section-title"><div><h2>المزيد</h2><p>الحجوزات، الأرشيف، النسخ الاحتياطي والإعدادات</p></div></div><div class="settings-grid">
+  <div class="setting-card clickable-card" onclick="openReservations()"><h3>📋 الحجوزات (${res.length})</h3><p class="muted">طلبات قبل التفعيل، مع إمكانية الإلغاء والأرشفة.</p><button class="btn secondary" onclick="event.stopPropagation();openReservations()">فتح الحجوزات</button></div>
+  <div class="setting-card clickable-card" onclick="openArchiveV24()"><h3>🗃️ الأرشيف (${arc})</h3><p class="muted">الأعضاء والحجوزات وAir/iHome والراوترات والخطوط المؤرشفة مع الاسترجاع.</p><button class="btn secondary" onclick="event.stopPropagation();openArchiveV24()">فتح الأرشيف</button></div>
+  <div class="setting-card"><h3>🧾 إيصالات التجديد (${receipts.length})</h3><p class="muted">كل إيصال محفوظ عند التجديد.</p><button class="btn secondary" onclick="openReceiptsArchive()">عرض الإيصالات</button></div>
+  <div class="setting-card"><h3>💾 النسخ الاحتياطي</h3><p class="muted">${esc(lastBackupTextV24())}. نزّل JSON كامل أو استرجع نسخة سابقة.</p><button class="btn" onclick="downloadBackup()">تنزيل JSON</button> <button class="btn secondary" onclick="triggerRestore()">استرجاع</button><input id="restoreInput" type="file" accept=".json,application/json" class="hidden" onchange="restoreBackup(this.files[0])"></div>
+  <div class="setting-card"><h3>📊 تصدير Excel</h3><p class="muted">الخطوط والعملاء والتحصيل والشرائح في ملف واحد.</p><button class="btn secondary" onclick="exportExcel()">تصدير Excel</button></div>
+  <div class="setting-card"><h3>↩️ التراجع</h3><p class="muted">يرجع آخر تعديل أو نقل أو إضافة أو أرشفة.</p><button class="btn secondary" onclick="undoLast()">تراجع عن آخر عملية</button></div>
+  <div class="setting-card"><h3>🔐 قفل سريع</h3><p class="muted">رقم سري لفتح البرنامج على الجهاز.</p><button class="btn secondary" onclick="openPinModal()">ضبط الرقم السري</button></div>
+  <div class="setting-card"><h3>💵 الأسعار التلقائية</h3><p class="muted">أسعار العميل والتاجر للعملاء الجدد.</p><button class="btn secondary" onclick="openPricesV24()">تعديل الأسعار</button></div>
+  <div class="setting-card"><h3>🧾 سجل الحركات</h3><p class="muted">آخر الإضافات والنقل والدفع والأرشفة.</p><button class="btn secondary" onclick="openAudit()">عرض السجل</button></div>
+  <div class="setting-card exit-card"><h3>🚪 خروج من البرنامج</h3><p class="muted">تأكيد قبل الخروج مع خيار عمل Backup أولًا.</p><button class="btn warn" onclick="openSafeExitV24()">خروج آمن</button></div>
+  <div class="setting-card"><h3>🔄 إعادة ضبط تجريبية</h3><p class="muted">إرجاع بيانات البداية المدمجة. استخدمها فقط بعد Backup.</p><button class="btn bad" onclick="resetToInitial()">إعادة ضبط</button></div>
+  </div>`;
+};
+window.openPricesV24=openPricesV24;
+
+/* تصحيح عداد الحجوزات في الرئيسية ليحسب النشط فقط */
+const renderDashboardBaseV24=renderDashboard;
+renderDashboard=function(){
+  renderDashboardBaseV24();
+  const b=document.querySelector('#page-dashboard .reservation-hero .btn.booking'),n=activeReservationsV24().length;
+  if(b)b.textContent='📋 الحجوزات الحالية'+(n?` (${num(n)})`:'');stampV24();
+};
+
+/* زر الأرشفة يظهر أيضًا داخل أعضاء الخط بعد كل إعادة فتح */
+
+/* اعتراض زر الرجوع في الـPWA: يقفل المودال أولًا، وإلا يعرض الخروج الآمن. */
+function installExitGuardV24(){
+  try{
+    if(!history.state?.managerV24Guard){history.replaceState(Object.assign({},history.state||{},{managerV24Base:true}),'');history.pushState({managerV24Guard:true},'')}
+    window.addEventListener('popstate',()=>{
+      if(window.__v24AllowExit)return;
+      try{history.pushState({managerV24Guard:true},'')}catch(e){}
+      const root=$('#modalRoot');if(root&&root.innerHTML.trim()){closeModal();return}
+      openSafeExitV24();
+    });
+  }catch(e){}
+}
+
+ensureV24Data();
+renderAll();stampV24();installExitGuardV24();
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+console.info('Family Lines V2.4 active');
+})();
+</script>\n
 </body></html>
