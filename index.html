@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#160d22" />
-<title>مدير الخطوط V2.3</title>
+<meta name="theme-color" content="#0b0318" />
+<title>مدير الخطوط الجديد V2.5</title>
 
 <style>
 :root{
@@ -145,9 +145,37 @@ body{background:radial-gradient(circle at 50% -15%,#16104a 0,#08091d 28%,#030612
 <link rel="apple-touch-icon" href="./icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="مدير الخطوط V2.3">
+<meta name="apple-mobile-web-app-title" content="مدير الخطوط الجديد">
 <meta name="mobile-web-app-capable" content="yes">
 
+<style>
+/* ===== V2.5 visual refresh ===== */
+body{background:
+ radial-gradient(circle at 82% -8%,rgba(116,34,204,.32),transparent 34%),
+ radial-gradient(circle at 12% 12%,rgba(76,19,140,.18),transparent 28%),
+ linear-gradient(180deg,#070313 0,#090518 45%,#05030d 100%)!important}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;background-image:url('./icon-512.png');background-repeat:no-repeat;background-position:120% 14%;background-size:min(70vw,720px);filter:grayscale(.4)}
+.topbar{background:rgba(7,3,19,.91)!important;border-color:rgba(167,80,255,.26)!important;box-shadow:0 8px 30px rgba(0,0,0,.22)}
+.brand-logo{overflow:hidden!important;background:#0b0417!important;border:1px solid rgba(185,91,255,.48);box-shadow:0 0 18px rgba(147,51,234,.28)!important}
+.brand-logo img{width:100%;height:100%;object-fit:cover;display:block}
+.brand h1{font-weight:900;letter-spacing:-.2px}.brand h1 .v24-version,.brand h1 #v25Badge{margin-right:7px}
+.summary-card,.final-group,.line-card,.setting-card,.result-card,.member-card{box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.btn{box-shadow:0 7px 18px rgba(82,25,160,.18)}
+.btn.smart-et{background:linear-gradient(135deg,#335d10,#6cae16)}.btn.smart-we{background:linear-gradient(135deg,#5b1f8c,#8e36d8)}
+.smart-analysis-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}.smart-analysis-home-v25{flex:1}
+.reservation-v25-card{border-color:rgba(170,91,246,.42);background:linear-gradient(180deg,#15102a,#0b0718)}
+.line-bill-alert-v25{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 13px;padding:12px 14px;border-radius:18px;border:1px solid rgba(255,135,27,.45);background:linear-gradient(135deg,rgba(113,52,8,.38),rgba(35,18,18,.7));box-shadow:0 0 24px rgba(255,123,18,.08)}
+.line-bill-alert-v25 div{display:grid;gap:3px}.line-bill-alert-v25 b{color:#ffd17d}.line-bill-alert-v25 span{color:#d9c4b3;font-size:12px}
+.bill-hero{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}.bill-hero>div{background:#0b0a21;border:1px solid #493268;border-radius:15px;padding:11px;text-align:center}.bill-hero span{display:block;color:#a99db8;font-size:11px}.bill-hero b{display:block;margin-top:6px;font-size:17px}
+.line-accounting-v25{margin:12px 0 14px}.line-health{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;border-radius:17px;border:1px solid}.line-health.covered{background:rgba(39,121,37,.13);border-color:rgba(102,224,72,.42)}.line-health.needs{background:rgba(144,76,14,.13);border-color:rgba(255,158,39,.42)}.line-health div{display:grid;gap:4px}.line-health b{font-size:16px}.line-health small{color:#c7b9d8}.line-tools-v25{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-top:8px}.line-tools-v25 .btn{min-height:48px}
+.line-v25-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;margin-top:10px;padding:9px 10px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.05);background:rgba(14,9,28,.58);font-size:11px}
+.smart-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}.smart-summary>div{background:#0c0921;border:1px solid #473068;border-radius:14px;padding:10px;text-align:center}.smart-summary span{display:block;color:#a89bb8;font-size:10px}.smart-summary b{display:block;margin-top:5px;font-size:17px}
+.smart-plan-list{margin-top:10px}.smart-plan-card{border:1px solid #49316e;border-radius:18px;padding:13px;background:linear-gradient(180deg,#11112e,#08091c)}.smart-plan-card.covered{border-color:rgba(91,206,53,.45)}.smart-plan-card.needs{border-color:rgba(244,160,42,.45)}.smart-plan-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.smart-plan-head h4{margin:0;font-size:16px}.smart-packages{color:#d8c8e7!important;line-height:1.8!important;margin:10px 0!important}.smart-numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.smart-numbers span{background:#0a081a;border-radius:11px;padding:8px;color:#9f95ae;font-size:10px}.smart-numbers b{display:block;color:#fff;margin-top:4px;font-size:13px}.smart-result{margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.07);font-weight:800}
+.splash-v25{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 35%,#2c0750 0,#0c021b 42%,#030107 100%);display:grid;place-items:center;transition:opacity .35s ease,visibility .35s ease}.splash-v25.hide{opacity:0;visibility:hidden}.splash-wolf{text-align:center;padding:22px}.splash-wolf img{width:min(54vw,260px);aspect-ratio:1;border-radius:28%;box-shadow:0 0 45px rgba(164,65,255,.35)}.splash-wolf h1{font-size:28px;margin:18px 0 5px}.splash-wolf h1 b{color:#f4c71d}.splash-wolf p{margin:0;color:#c7bbd4;font-size:15px}
+#lockScreen .brand-logo{width:86px;height:86px;border-radius:24px!important}
+@media(max-width:620px){.smart-analysis-bar{grid-template-columns:1fr}.bill-hero{grid-template-columns:repeat(2,1fr)}.line-tools-v25{grid-template-columns:1fr}.smart-summary{grid-template-columns:repeat(2,1fr)}.smart-numbers{grid-template-columns:repeat(2,1fr)}.line-bill-alert-v25{align-items:flex-start;flex-direction:column}.line-v25-strip{display:grid;grid-template-columns:1fr 1fr}.line-v25-strip span:last-child{grid-column:1/-1}}
+
+</style>
 </head>
 <body>
 <div id="lockScreen" class="lock hidden"><div class="lock-box"><div class="brand-logo" style="margin:auto">خ</div><h2>مدير الخطوط</h2><p class="muted">أدخل الرقم السري</p><input id="lockPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/><button class="btn" onclick="unlockApp()">فتح</button><p id="lockMsg" class="bad"></p></div></div>
@@ -1023,7 +1051,7 @@ load();renderAll();
   }
 
   /* شاشة أسعار موحدة: عميل + تاجر */
-  openPrices=function(){
+  window.openPrices=function(){
     ensurePricingV21();
     const grid=(title,type,net,map)=>'<h4 style="margin-top:18px">'+title+'</h4><div class="price-grid">'+
       Object.entries(map).sort((a,b)=>Number(a[0])-Number(b[0])).map(([gb,p])=>
@@ -1040,7 +1068,7 @@ load();renderAll();
       grid('🟢 أسعار التاجر — اتصالات','dealer','اتصالات',state.settings.dealerPrices['اتصالات'])+wireless;
     modal('الأسعار — عميل / تاجر',body,'<button class="btn" onclick="savePrices()">حفظ الأسعار</button>');
   };
-  savePrices=function(){
+  window.savePrices=function(){
     commit('تعديل أسعار العميل والتاجر',()=>{
       document.querySelectorAll('.v21PriceInput').forEach(i=>{
         const bucket=i.dataset.type==='dealer'?state.settings.dealerPrices:state.settings.customerPrices;
@@ -1690,4 +1718,358 @@ if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r
 console.info('Family Lines V2.4 active');
 })();
 </script>\n
+<script>
+/* ===== V2.5: profitability engine, line bills, reservation cycles, branding ===== */
+(function(){
+'use strict';
+const V25='2.5';
+let _activatingReservationIdV25='';
+
+function localISOv25(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')}
+function addDaysV25(s,n){const d=parseDate(s);if(!d)return s;d.setDate(d.getDate()+Number(n||0));return localISOv25(d)}
+function cycleDueForGroupV25(group,at=todayISO()){
+  const base=parseDate(String(at).slice(0,10))||new Date(), day=groupDay(group);
+  let y=base.getFullYear(),m=base.getMonth();
+  if(base.getDate()<day)m--;
+  const last=new Date(y,m+1,0).getDate();
+  return localISOv25(new Date(y,m,Math.min(day,last)));
+}
+function targetGroupForV25(network,when=new Date()){
+  let d;
+  if(when instanceof Date)d=when;
+  else if(String(when||'').includes('T'))d=new Date(when);
+  else d=parseDate(String(when||''))||new Date();
+  const day=d.getDate();
+  if(network==='اتصالات')return day<=15?'اتصالات يوم 15':'اتصالات يوم 1';
+  return day<=15?'WE يوم 16':'WE يوم 1';
+}
+function targetLabelV25(r){return r?.targetGroup||targetGroupForV25(r?.network||'اتصالات',r?.createdAt||todayISO())}
+function reservationActiveV25(r){return r&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي'}
+function currentExtraSalesV25(l){const cyc=cycleDueForGroupV25(l.group);return (state.extraGbSales||[]).filter(x=>x.active!==false&&x.lineId===l.id&&x.cycleDue===cyc)}
+function paidLineBillCountV25(l){return Number(l.legacyPaidBillCount||0)+(state.lineBills||[]).filter(b=>b.lineId===l.id&&b.status==='مدفوع').length}
+
+function ensureLineBillsV25(initial=false){
+  state.lineBills=state.lineBills||[];
+  let changed=false;
+  for(const l of state.lines||[]){
+    if(!l.active)continue;
+    const current=cycleDueForGroupV25(l.group);
+    let bills=state.lineBills.filter(b=>b.lineId===l.id).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+    if(!bills.length){
+      state.lineBills.push({id:uid('lb'),lineId:l.id,dueDate:current,amount:Number(l.cost||0),paid:0,status:initial?'غير محدد':'غير مدفوع',paidDate:'',createdAt:new Date().toISOString(),migrationUnknown:!!initial});
+      changed=true;bills=state.lineBills.filter(b=>b.lineId===l.id).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+    }
+    let last=bills[bills.length-1];
+    let next=addMonths(last.dueDate,1);
+    while(next<=current){
+      state.lineBills.push({id:uid('lb'),lineId:l.id,dueDate:next,amount:Number(l.cost||0),paid:0,status:'غير مدفوع',paidDate:'',createdAt:new Date().toISOString(),migrationUnknown:false});
+      changed=true;last={dueDate:next};next=addMonths(next,1);
+    }
+  }
+  return changed;
+}
+function currentLineBillV25(l){
+  ensureLineBillsV25(false);
+  return (state.lineBills||[]).filter(b=>b.lineId===l.id&&b.dueDate<=todayISO()).sort((a,b)=>b.dueDate.localeCompare(a.dueDate))[0]||null;
+}
+function lineBillInfoV25(l){
+  const b=currentLineBillV25(l);
+  if(!b)return{amount:Number(l.cost||0),paid:0,remaining:Number(l.cost||0),status:'غير محدد',due:'',reminder:'',overdueDays:0,b:null};
+  const amount=Number(b.amount||0),paid=Number(b.paid||0),remaining=Math.max(0,amount-paid);
+  let status=b.status||statusOf(amount,paid);
+  if(status!=='غير محدد')status=statusOf(amount,paid)==='لسه'?'غير مدفوع':statusOf(amount,paid);
+  const reminder=addDaysV25(b.dueDate,Number(state.settings.lineBillReminderDays||5));
+  const overdueDays=(remaining>0&&status!=='غير محدد'&&todayISO()>reminder)?Math.max(0,diffDays(todayISO(),reminder)):0;
+  return{amount,paid,remaining,status,due:b.dueDate,reminder,overdueDays,b};
+}
+function lineBillGroupSummaryV25(group){
+  const lines=state.lines.filter(l=>l.active&&l.group===group),infos=lines.map(l=>({l,i:lineBillInfoV25(l)}));
+  return{
+    total:lines.reduce((s,l)=>s+Number(l.cost||0),0),
+    unpaidCount:infos.filter(x=>x.i.status!=='مدفوع'&&x.i.status!=='غير محدد').length,
+    unpaidAmount:infos.filter(x=>x.i.status!=='مدفوع'&&x.i.status!=='غير محدد').reduce((s,x)=>s+x.i.remaining,0),
+    unknownCount:infos.filter(x=>x.i.status==='غير محدد').length,
+    overdueCount:infos.filter(x=>x.i.overdueDays>0).length,
+    overdueAmount:infos.filter(x=>x.i.overdueDays>0).reduce((s,x)=>s+x.i.remaining,0)
+  };
+}
+function lineBillAlertsV25(){
+  return state.lines.filter(l=>l.active).map(l=>({l,i:lineBillInfoV25(l)})).filter(x=>x.i.overdueDays>0);
+}
+
+function ensureV25Data(){
+  state.lineBills=state.lineBills||[];state.extraGbSales=state.extraGbSales||[];state.settings=state.settings||{};
+  if(!Number(state.settings.lineBillReminderDays))state.settings.lineBillReminderDays=5;
+  state.settings.smartDefaultCapacity=state.settings.smartDefaultCapacity||{'اتصالات':200,'WE':200};
+  state.settings.smartDefaultMembers=state.settings.smartDefaultMembers||{'اتصالات':7,'WE':6};
+  state.settings.smartDefaultCost=state.settings.smartDefaultCost||{'اتصالات':2200,'WE':1700};
+  state.settings.customerPrices=state.settings.customerPrices||{};state.settings.customerPrices['اتصالات']=state.settings.customerPrices['اتصالات']||state.settings.etisalatPrices||{};
+  if(state.settings.customerPrices['اتصالات']['10']==null)state.settings.customerPrices['اتصالات']['10']=240;
+  state.settings.dealerPrices=state.settings.dealerPrices||{};state.settings.dealerPrices['اتصالات']=state.settings.dealerPrices['اتصالات']||{};
+  if(state.settings.dealerPrices['اتصالات']['10']==null)state.settings.dealerPrices['اتصالات']['10']=240;
+  state.settings.etisalatPrices=Object.assign({},state.settings.customerPrices['اتصالات']);
+  for(const l of state.lines||[]){if(l.legacyPaidBillCount==null)l.legacyPaidBillCount=0}
+  for(const r of state.reservations||[]){
+    if(r.active==null)r.active=r.status!=='تم التفعيل'&&r.status!=='ملغي';
+    if(r.contact==null)r.contact=r.whatsapp||'';
+    if(!r.createdAt)r.createdAt=new Date().toISOString();
+    if(!r.targetGroup)r.targetGroup=targetGroupForV25(r.network,r.createdAt);
+  }
+  const first=!state.settings.v25LineBillsInitialized;
+  ensureLineBillsV25(first);
+  state.settings.v25LineBillsInitialized=true;state.settings.appVersion=V25;state.schemaVersion=Math.max(Number(state.schemaVersion||1),6);
+  storageSet(STORAGE_KEY,JSON.stringify(state));
+}
+
+/* ===== financial overrides: reservations remain excluded; extra GB enters only when sold ===== */
+const _lineMetricsV25Base=lineMetrics;
+lineMetrics=function(l,excludeCustomerId=''){
+  const m=_lineMetricsV25Base(l,excludeCustomerId),extra=currentExtraSalesV25(l).reduce((s,x)=>s+Number(x.gb||0),0);
+  return Object.assign({},m,{customerAllocated:Number(m.allocated||0),extraAllocated:extra,allocated:Number(m.allocated||0)+extra,remaining:Number(m.remaining||0)-extra});
+};
+const _lineFinancialsV25Base=lineFinancials;
+lineFinancials=function(l){
+  const f=_lineFinancialsV25Base(l),xs=currentExtraSalesV25(l);
+  const extraDue=xs.reduce((s,x)=>s+Number(x.amount||0),0),extraCollected=xs.reduce((s,x)=>s+Number(x.paid??x.amount??0),0),extraOutstanding=Math.max(0,extraDue-extraCollected);
+  const totalDue=Number(f.totalDue||0)+extraDue,totalCollected=Number(f.totalCollected||0)+extraCollected,totalOutstanding=Number(f.totalOutstanding||0)+extraOutstanding,invoice=Number(f.invoice||l.cost||0);
+  return Object.assign({},f,{extraDue,extraCollected,extraOutstanding,totalDue,totalCollected,totalOutstanding,netProfit:totalDue-invoice,expectedProfit:totalDue-invoice,cashPosition:totalCollected-invoice,invoiceRemaining:Math.max(0,invoice-totalCollected),collectedSurplus:Math.max(0,totalCollected-invoice)});
+};
+const _groupMetricsV25Base=groupMetrics;
+groupMetrics=function(group){
+  const m=_groupMetricsV25Base(group),lines=state.lines.filter(l=>l.active&&l.group===group),cs=state.customers.filter(c=>c.active&&customerLine(c)?.group===group).map(c=>({c,i:paymentInfo(c)})),bs=lineBillGroupSummaryV25(group);
+  const fs=lines.map(lineFinancials);
+  return Object.assign({},m,{invoice:lines.reduce((s,l)=>s+Number(l.cost||0),0),totalSales:fs.reduce((s,f)=>s+Number(f.totalDue||0),0),collected:fs.reduce((s,f)=>s+Number(f.totalCollected||0),0),outstanding:fs.reduce((s,f)=>s+Number(f.totalOutstanding||0),0),netProfit:fs.reduce((s,f)=>s+Number(f.netProfit||0),0),customerUnpaidCount:cs.filter(x=>x.i.remaining>0).length,customerOutstanding:cs.reduce((s,x)=>s+Number(x.i.remaining||0),0),lineBills:bs});
+};
+const _overallFinancialsV25Base=overallFinancials;
+overallFinancials=function(){
+  const base=_overallFinancialsV25Base(),xs=(state.extraGbSales||[]).filter(x=>x.active!==false&&state.lines.some(l=>l.active&&l.id===x.lineId&&x.cycleDue===cycleDueForGroupV25(l.group)));
+  const due=xs.reduce((s,x)=>s+Number(x.amount||0),0),paid=xs.reduce((s,x)=>s+Number(x.paid??x.amount??0),0);
+  return Object.assign({},base,{totalDue:Number(base.totalDue||0)+due,collected:Number(base.collected||0)+paid,outstanding:Number(base.outstanding||0)+Math.max(0,due-paid),netProfit:Number(base.netProfit||0)+due,cashPosition:Number(base.cashPosition||0)+paid});
+};
+
+/* ===== duplicate protection ===== */
+function findNumberConflictV25(phone,opt={}){
+  phone=arToEnDigits(String(phone||'')).trim();if(!phoneOk(phone))return null;
+  const c=(state.customers||[]).find(x=>x.phone===phone&&x.id!==opt.excludeCustomerId);
+  if(c){const l=customerLine(c);return{kind:'عميل',archived:c.active===false,name:customerDisplayName(c),where:l?.group||'بدون خط',id:c.id}}
+  const r=(state.reservations||[]).find(x=>x.phone===phone&&x.id!==opt.excludeReservationId);
+  if(r)return{kind:'حجز',archived:r.active===false||r.status==='ملغي'||r.status==='تم التفعيل',name:r.name||'بدون اسم',where:targetLabelV25(r),id:r.id};
+  return null;
+}
+function duplicateMessageV25(x,phone){return `⚠️ الرقم ${phone} مسجل بالفعل\nالاسم: ${x.name}\nالحالة: ${x.archived?'مؤرشف':'نشط'} — ${x.kind}\nالمكان: ${x.where}${x.archived?'\n\nاسترجع السجل القديم من الأرشيف بدل إنشاء نسخة جديدة.':''}`}
+
+const _saveCustomerV25Base=saveCustomer;
+saveCustomer=function(id='',after='close'){
+  const phone=arToEnDigits($('#fCustPhone')?.value||'');
+  const conflict=findNumberConflictV25(phone,{excludeCustomerId:id,excludeReservationId:_activatingReservationIdV25});
+  if(conflict)return alert(duplicateMessageV25(conflict,phone));
+  const before=new Set(state.customers.map(c=>c.id));
+  _saveCustomerV25Base.apply(this,arguments);
+  if(!id&&_activatingReservationIdV25){
+    const newCustomer=state.customers.find(c=>c.active&&c.phone===phone&&!before.has(c.id));
+    if(newCustomer){
+      const r=state.reservations.find(x=>x.id===_activatingReservationIdV25);
+      if(r){r.status='تم التفعيل';r.active=false;r.activatedAt=new Date().toISOString();r.activatedCustomerId=newCustomer.id;r.archivedAt='';storageSet(STORAGE_KEY,JSON.stringify(state));}
+      _activatingReservationIdV25='';
+    }
+  }
+};
+if(typeof saveQuickSingleV2==='function'){
+  const _saveQuickSingleV25Base=saveQuickSingleV2;
+  saveQuickSingleV2=function(){const p=arToEnDigits($('#qsPhone')?.value||'');const x=findNumberConflictV25(p);if(x)return alert(duplicateMessageV25(x,p));return _saveQuickSingleV25Base.apply(this,arguments)};
+}
+if(typeof saveQuickSingle==='function'){
+  const _saveQuickSingleOldV25=saveQuickSingle;
+  saveQuickSingle=function(){const p=arToEnDigits($('#qsPhone')?.value||'');const x=findNumberConflictV25(p);if(x)return alert(duplicateMessageV25(x,p));return _saveQuickSingleOldV25.apply(this,arguments)};
+}
+if(typeof validateBulkRowsV2==='function'){
+  validateBulkRowsV2=function(){
+    const lid=$('#bulkLineV2')?.value,l=state.lines.find(x=>x.id===lid),m=l?lineMetrics(l):null,seen=new Set();let slots=m?.vacancies||0,cap=m?.remaining||0;const rows=[];
+    for(const r of _bulkRows){const phone=arToEnDigits(r.phone||''),contact=arToEnDigits(r.contact||''),gb=Number(arToEnDigits(r.gb||0)),price=Number(r.price||0),paid=Number(r.paid||0);let err='';const conflict=findNumberConflictV25(phone);if(!phoneOk(phone))err='رقم العميل لازم 11 رقم';else if(contact&&!phoneOk(contact))err='رقم التواصل غير صحيح';else if(seen.has(phone))err='الرقم مكرر داخل الإدخال';else if(conflict)err=`الرقم موجود بالفعل (${conflict.kind}${conflict.archived?' مؤرشف':''})`;else if(!(gb>0))err='اكتب الباقة';else if(slots<=0)err='الأماكن غير كافية';else if(cap<gb)err=`الجيجات غير كافية — المتاح ${cap}GB`;if(!err){slots--;cap-=gb}seen.add(phone);rows.push({...r,phone,contact,gb,price,paid,err})}
+    return{l,rows,valid:rows.filter(r=>!r.err),errors:rows.filter(r=>r.err)};
+  };
+}
+if(typeof bulkValidation==='function'){
+  bulkValidation=function(){const nums=bulkParseNumbers(),lid=$('#bulkLine')?.value,l=state.lines.find(x=>x.id===lid),gb=Number(arToEnDigits($('#bulkGb')?.value||0)),m=l?lineMetrics(l):null;const seen=new Set(),rows=[];let slots=m?.vacancies||0,capacity=m?.remaining||0;for(const p of nums){let err='',conflict=findNumberConflictV25(p);if(!phoneOk(p))err='الرقم لازم 11 رقم';else if(seen.has(p))err='مكرر داخل القائمة';else if(conflict)err=`مسجل بالفعل (${conflict.kind}${conflict.archived?' مؤرشف':''})`;else if(slots<=0)err='لا توجد أماكن كافية';else if(gb<=0)err='اكتب الباقة';else if(capacity<gb)err='لا توجد جيجات كافية';if(!err){slots--;capacity-=gb}seen.add(p);rows.push({p,err})}return{rows,l,gb,valid:rows.filter(x=>!x.err),errors:rows.filter(x=>x.err)}};
+}
+
+/* ===== reservations: edit, contact number, target cycle, no financial impact until activation ===== */
+function reservationAutoGroupV25(){const net=$('#rvNet')?.value||'اتصالات',sel=$('#rvTargetGroup');if(sel)sel.innerHTML=(GROUPS[net]||[]).map(g=>`<option value="${esc(g)}" ${g===targetGroupForV25(net,new Date())?'selected':''}>${esc(g)}</option>`).join('')}
+openReservationModal=function(id=''){
+  _modalReturnLineId='';const r=id?state.reservations.find(x=>x.id===id):null,net=r?.network||'اتصالات',gb=String(r?.package||''),target=r?.targetGroup||targetGroupForV25(net,r?.createdAt||new Date()),amount=r?.amount??(gb?quickPriceFor(net,gb):'');
+  modal(r?'✏️ تعديل الحجز':'📌 حجز جديد',`<div class="alert good">الحجز لا يدخل في المبيعات أو الجيجات أو الأماكن إلا بعد تفعيله كعميل.</div><div class="form-grid"><div class="field"><label>الاسم (اختياري)</label><input id="rvName" value="${esc(r?.name||'')}"></div><div class="field"><label>رقم العميل — 11 رقم</label><input id="rvPhone" maxlength="11" inputmode="numeric" value="${esc(r?.phone||'')}" oninput="this.value=arToEnDigits(this.value).slice(0,11)"></div><div class="field"><label>رقم التواصل (اختياري)</label><input id="rvContact" maxlength="11" inputmode="numeric" value="${esc(r?.contact||'')}" oninput="this.value=arToEnDigits(this.value).slice(0,11)"></div><div class="field"><label>الشبكة</label><select id="rvNet" onchange="rvNetChangedV25()"><option ${net==='اتصالات'?'selected':''}>اتصالات</option><option ${net==='WE'?'selected':''}>WE</option></select></div><div class="field"><label>دورة التفعيل</label><select id="rvTargetGroup">${(GROUPS[net]||[]).map(g=>`<option value="${esc(g)}" ${g===target?'selected':''}>${esc(g)}</option>`).join('')}</select><span class="hint">تتحدد تلقائيًا حسب يوم الحجز، ويمكن تغييرها عند الحاجة.</span></div><div class="field"><label>الباقة</label><div class="package-combo"><input id="rvPackManual" inputmode="numeric" value="${esc(gb)}" placeholder="مثال 20" oninput="reservationPackageTypedV25()"><select id="rvPack" onchange="reservationQuickPackV25()">${packageOptions(net,gb)}</select></div></div><div class="field"><label>السعر</label><input id="rvAmount" type="number" min="0" value="${esc(amount||0)}"></div><div class="field"><label>المدفوع / العربون</label><input id="rvPaid" type="number" min="0" value="${esc(r?.paid||0)}"></div><div class="field full"><label>ملاحظات</label><textarea id="rvNotes">${esc(r?.notes||'')}</textarea></div></div>`,`${r?`<button class="btn" onclick="saveReservationV25('${id}')">حفظ التعديلات</button>`:`<button class="btn booking" onclick="saveReservationV25('')">حفظ الحجز 📌</button>`}<button class="btn secondary" onclick="openReservations()">عرض الحجوزات</button>`);
+  setTimeout(()=>{if(!gb){const first=$('#rvPack option')?.value||'';if(first){$('#rvPackManual').value=first;reservationPackageTypedV25()}}},20);
+};
+function reservationPackageTypedV25(){const n=$('#rvNet')?.value||'اتصالات',gb=Number(arToEnDigits($('#rvPackManual')?.value||0)),p=quickPriceFor(n,gb);if(p!==null)$('#rvAmount').value=p}
+function reservationQuickPackV25(){const s=$('#rvPack');if(s?.value){$('#rvPackManual').value=s.value;reservationPackageTypedV25()}}
+function rvNetChangedV25(){const n=$('#rvNet').value,s=$('#rvPack');if(s)s.innerHTML=packageOptions(n);reservationAutoGroupV25();reservationPackageTypedV25()}
+function saveReservationV25(id=''){
+  const phone=arToEnDigits($('#rvPhone')?.value||''),contact=arToEnDigits($('#rvContact')?.value||'');if(!phoneOk(phone))return alert('رقم العميل لازم يكون 11 رقم');if(contact&&!phoneOk(contact))return alert('رقم التواصل غير صحيح');
+  const conflict=findNumberConflictV25(phone,{excludeReservationId:id});if(conflict)return alert(duplicateMessageV25(conflict,phone));
+  const amount=Number($('#rvAmount')?.value||0),paid=Number($('#rvPaid')?.value||0),pack=Number(arToEnDigits($('#rvPackManual')?.value||0));if(!(pack>0))return alert('اكتب الباقة');
+  const network=$('#rvNet').value,targetGroup=$('#rvTargetGroup').value;
+  commit((id?'تعديل حجز ':'إضافة حجز ')+phone,()=>{let r=id?state.reservations.find(x=>x.id===id):null;if(!r){r={id:uid('res'),createdAt:new Date().toISOString(),active:true,status:'جديد'};state.reservations.push(r)}Object.assign(r,{name:($('#rvName')?.value||'').trim(),phone,contact,network,targetGroup,package:String(pack),amount,paid,paymentStatus:statusOf(amount,paid),notes:$('#rvNotes')?.value||'',active:true,status:r.status==='تم التفعيل'?'جديد':(r.status||'جديد')})});closeModal();toast(id?'تم تعديل الحجز ✅':'تم حفظ الحجز ✅');renderDashboard();
+}
+function activateReservationV25(id){
+  const r=state.reservations.find(x=>x.id===id&&reservationActiveV25(x));if(!r)return;
+  const conflict=(state.customers||[]).find(c=>c.active&&c.phone===r.phone);if(conflict)return alert(duplicateMessageV25({kind:'عميل',archived:false,name:customerDisplayName(conflict),where:customerLine(conflict)?.group||'بدون خط'},r.phone));
+  _activatingReservationIdV25=id;closeModal();showPage('customers');openCustomerModal('',{name:r.name,phone:r.phone,network:r.network,group:targetLabelV25(r),package:r.package,price:r.amount,paid:r.paid});
+  setTimeout(()=>{const wa=$('#fCustWA');if(wa&&r.contact)wa.value=r.contact},20);
+}
+activateReservation=activateReservationV25;
+openReservations=function(){
+  const rows=(state.reservations||[]).filter(reservationActiveV25).slice().sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+  const etGroup=targetGroupForV25('اتصالات'),weGroup=targetGroupForV25('WE');
+  modal('📋 الحجوزات',`<div class="smart-analysis-bar"><button class="btn smart-et" onclick="openSmartAnalysisV25('اتصالات')">🧠 تحليل اتصالات — ${esc(etGroup.replace('اتصالات ',''))}</button><button class="btn smart-we" onclick="openSmartAnalysisV25('WE')">🧠 تحليل WE — ${esc(weGroup.replace('WE ',''))}</button></div><div style="margin:10px 0"><button class="btn booking" onclick="openReservationModal()">+ حجز جديد</button></div><div class="cards-list">${rows.map(r=>`<article class="result-card reservation-v25-card clickable-card" onclick="openReservationModal('${r.id}')"><div class="type">${esc(r.network)} • تفعيل ${esc(targetLabelV25(r).replace(r.network+' ',''))} • ${esc(r.status||'جديد')}</div><h4>${esc(r.name||'بدون اسم')}</h4><p><b>${esc(r.phone)}</b> • باقة ${esc(r.package)}GB • ${money(r.amount)}</p><p>الدفع: <span class="${Number(r.paid||0)>=Number(r.amount||0)?'good':Number(r.paid||0)>0?'warn':'bad'}">${esc(r.paymentStatus||statusOf(r.amount,r.paid))}</span>${r.notes?` • ${esc(r.notes)}`:''}</p><div class="actions" onclick="event.stopPropagation()"><button class="btn small" onclick="activateReservationV25('${r.id}')">تفعيل كعميل</button><button class="btn secondary small" onclick="openReservationModal('${r.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveReservationV24('${r.id}')">🗃️ أرشفة</button></div></article>`).join('')||'<div class="empty">لا توجد حجوزات حالية</div>'}</div>`);
+};
+window.saveReservationV25=saveReservationV25;window.activateReservationV25=activateReservationV25;window.rvNetChangedV25=rvNetChangedV25;window.reservationPackageTypedV25=reservationPackageTypedV25;window.reservationQuickPackV25=reservationQuickPackV25;
+
+/* ===== line invoice cycles ===== */
+function openLineBillV25(lineId){
+  const l=state.lines.find(x=>x.id===lineId);if(!l)return;const i=lineBillInfoV25(l),paidCount=paidLineBillCountV25(l),cls=i.status==='مدفوع'?'good':i.status==='غير محدد'?'warn':'bad';
+  modal('🧾 فاتورة الخط — '+l.owner,`<div class="bill-hero"><div><span>دورة الفاتورة</span><b>${esc(i.due||'-')}</b></div><div><span>قيمة الفاتورة</span><b>${money(i.amount)}</b></div><div><span>المدفوع</span><b class="good">${money(i.paid)}</b></div><div><span>المتبقي</span><b class="${i.remaining?'bad':'good'}">${money(i.remaining)}</b></div></div><div class="alert ${cls}">الحالة: <b>${esc(i.status)}</b>${i.status==='غير محدد'?'<br>هذه أول دورة بعد التحديث. حدّد حالتها مرة واحدة حتى تبدأ التنبيهات بدقة.':i.overdueDays?`<br>⚠️ متأخرة ${num(i.overdueDays)} يوم بعد موعد التذكير.`:`<br>موعد التذكير: ${esc(i.reminder)}`}</div><div class="info-card"><div class="info-row"><span>عدد الفواتير المدفوعة</span><b>${num(paidCount)} فاتورة</b></div><div class="info-row"><span>تذكير الدفع</span><b>بعد ${num(state.settings.lineBillReminderDays||5)} أيام من التجديد</b></div></div><div class="field" style="margin-top:12px"><label>عدد فواتير قديمة مدفوعة قبل النظام الجديد (اختياري)</label><input id="legacyPaidBillsV25" type="number" min="0" value="${num(l.legacyPaidBillCount||0)}"></div>`,`<button class="btn good" onclick="markLineBillPaidFullV25('${lineId}')">✅ تم دفع الفاتورة</button><button class="btn secondary" onclick="openLineBillPaymentV25('${lineId}')">💵 تسجيل دفعة</button>${i.status==='غير محدد'?`<button class="btn warn" onclick="markLineBillUnpaidV25('${lineId}')">تأكيد أنها غير مدفوعة</button>`:''}<button class="btn secondary" onclick="saveLegacyPaidBillsV25('${lineId}')">حفظ العدد القديم</button><button class="btn secondary" onclick="openLineBillHistoryV25('${lineId}')">سجل الفواتير</button>`);
+}
+function markLineBillPaidFullV25(lineId){const l=state.lines.find(x=>x.id===lineId),i=l?lineBillInfoV25(l):null;if(!i?.b)return;commit('دفع فاتورة خط '+l.number,()=>{i.b.paid=Number(i.b.amount||0);i.b.status='مدفوع';i.b.paidDate=todayISO();i.b.migrationUnknown=false});openLineBillV25(lineId)}
+function markLineBillUnpaidV25(lineId){const l=state.lines.find(x=>x.id===lineId),i=l?lineBillInfoV25(l):null;if(!i?.b)return;commit('تأكيد فاتورة غير مدفوعة '+l.number,()=>{i.b.status='غير مدفوع';i.b.paid=Number(i.b.paid||0);i.b.migrationUnknown=false});openLineBillV25(lineId)}
+function openLineBillPaymentV25(lineId){const l=state.lines.find(x=>x.id===lineId),i=l?lineBillInfoV25(l):null;if(!i?.b)return;modal('💵 تسجيل دفعة فاتورة',`<div class="alert warn">المتبقي حاليًا ${money(i.remaining)}</div><div class="field"><label>قيمة الدفعة</label><input id="lineBillPayV25" type="number" min="0" max="${i.remaining}" value="${i.remaining}"></div>`,`<button class="btn" onclick="saveLineBillPaymentV25('${lineId}')">حفظ الدفعة</button><button class="btn secondary" onclick="openLineBillV25('${lineId}')">رجوع</button>`)}
+function saveLineBillPaymentV25(lineId){const l=state.lines.find(x=>x.id===lineId),i=l?lineBillInfoV25(l):null,amt=Number($('#lineBillPayV25')?.value||0);if(!i?.b||!(amt>0))return alert('اكتب قيمة الدفعة');commit('دفعة فاتورة خط '+l.number,()=>{i.b.paid=Math.min(Number(i.b.amount||0),Number(i.b.paid||0)+amt);i.b.status=i.b.paid>=Number(i.b.amount||0)?'مدفوع':'مدفوع جزئي';i.b.paidDate=i.b.status==='مدفوع'?todayISO():'';i.b.migrationUnknown=false});openLineBillV25(lineId)}
+function saveLegacyPaidBillsV25(lineId){const l=state.lines.find(x=>x.id===lineId);if(!l)return;const n=Math.max(0,Number($('#legacyPaidBillsV25')?.value||0));commit('تحديث عدد الفواتير السابقة '+l.number,()=>l.legacyPaidBillCount=n);openLineBillV25(lineId)}
+function openLineBillHistoryV25(lineId){const l=state.lines.find(x=>x.id===lineId);if(!l)return;const rows=(state.lineBills||[]).filter(b=>b.lineId===lineId).sort((a,b)=>b.dueDate.localeCompare(a.dueDate));modal('📚 سجل فواتير الخط — '+l.owner,`<div class="alert good">إجمالي الفواتير المدفوعة المسجلة: <b>${num(paidLineBillCountV25(l))}</b></div><div class="cards-list">${rows.map(b=>{const rem=Math.max(0,Number(b.amount||0)-Number(b.paid||0)),st=b.status==='غير محدد'?'غير محدد':(statusOf(b.amount,b.paid)==='لسه'?'غير مدفوع':statusOf(b.amount,b.paid));return `<div class="result-card"><div class="type">دورة ${esc(b.dueDate)}</div><h4>${money(b.amount)} • <span class="${st==='مدفوع'?'good':st==='غير محدد'?'warn':'bad'}">${esc(st)}</span></h4><p>مدفوع ${money(b.paid)} • متبقي ${money(rem)}${b.paidDate?` • تاريخ الدفع ${esc(b.paidDate)}`:''}</p></div>`}).join('')||'<div class="empty">لا يوجد سجل</div>'}</div>`,`<button class="btn secondary" onclick="openLineBillV25('${lineId}')">رجوع</button>`)}
+window.openLineBillV25=openLineBillV25;window.markLineBillPaidFullV25=markLineBillPaidFullV25;window.markLineBillUnpaidV25=markLineBillUnpaidV25;window.openLineBillPaymentV25=openLineBillPaymentV25;window.saveLineBillPaymentV25=saveLineBillPaymentV25;window.saveLegacyPaidBillsV25=saveLegacyPaidBillsV25;window.openLineBillHistoryV25=openLineBillHistoryV25;
+
+/* new line bill on lines created after V2.5 */
+const _saveLineV25Base=saveLine;
+saveLine=function(id=''){
+  const before=new Set(state.lines.map(l=>l.id));_saveLineV25Base.apply(this,arguments);
+  if(!id){const l=[...state.lines].reverse().find(x=>x.active&&!before.has(x.id));if(l&&!state.lineBills.some(b=>b.lineId===l.id)){state.lineBills.push({id:uid('lb'),lineId:l.id,dueDate:cycleDueForGroupV25(l.group),amount:Number(l.cost||0),paid:0,status:'غير مدفوع',paidDate:'',createdAt:new Date().toISOString(),migrationUnknown:false});storageSet(STORAGE_KEY,JSON.stringify(state));}}
+};
+
+/* ===== extra GB sales ===== */
+function openExtraGbSaleV25(lineId){const l=state.lines.find(x=>x.id===lineId);if(!l)return;const m=lineMetrics(l);if(m.remaining<=0)return alert('لا توجد جيجات متبقية للبيع');modal('📦 بيع جيجات إضافية — '+l.owner,`<div class="alert good">المتاح حاليًا: <b>${num(m.remaining)}GB</b>. البيع الإضافي يدخل في المبيعات والربح فقط بعد تسجيله هنا.</div><div class="form-grid"><div class="field"><label>اسم العميل (اختياري)</label><input id="xgbNameV25"></div><div class="field"><label>رقم العميل / التواصل (اختياري)</label><input id="xgbPhoneV25" maxlength="11" inputmode="numeric"></div><div class="field"><label>عدد الجيجات</label><input id="xgbGbV25" type="number" min="1" max="${Math.max(0,m.remaining)}" oninput="extraGbCalcV25()"></div><div class="field"><label>سعر الجيجا</label><input id="xgbUnitV25" type="number" min="0" oninput="extraGbCalcV25()"></div><div class="field"><label>الإجمالي</label><input id="xgbAmountV25" type="number" min="0" oninput="$('#xgbPaidV25').value=this.value"></div><div class="field"><label>المحصل الآن</label><input id="xgbPaidV25" type="number" min="0"></div><div class="field full"><label>ملاحظات</label><textarea id="xgbNotesV25"></textarea></div></div>`,`<button class="btn good" onclick="saveExtraGbSaleV25('${lineId}')">تسجيل البيع</button><button class="btn secondary" onclick="openExtraGbHistoryV25('${lineId}')">سجل البيع الإضافي</button>`)}
+function extraGbCalcV25(){const gb=Number($('#xgbGbV25')?.value||0),unit=Number($('#xgbUnitV25')?.value||0);if(gb&&unit){const total=gb*unit;$('#xgbAmountV25').value=total;$('#xgbPaidV25').value=total}}
+function saveExtraGbSaleV25(lineId){const l=state.lines.find(x=>x.id===lineId);if(!l)return;const m=lineMetrics(l),gb=Number($('#xgbGbV25')?.value||0),amount=Number($('#xgbAmountV25')?.value||0),paid=Number($('#xgbPaidV25')?.value||0),phone=arToEnDigits($('#xgbPhoneV25')?.value||'');if(!(gb>0))return alert('اكتب عدد الجيجات');if(gb>m.remaining)return alert(`المتاح ${num(m.remaining)}GB فقط`);if(phone&&!phoneOk(phone))return alert('رقم التواصل غير صحيح');commit('بيع جيجات إضافية '+gb+'GB على '+l.number,()=>state.extraGbSales.push({id:uid('xgb'),lineId,cycleDue:cycleDueForGroupV25(l.group),name:($('#xgbNameV25')?.value||'').trim(),phone,gb,amount,paid:Math.min(amount,paid),notes:$('#xgbNotesV25')?.value||'',createdAt:new Date().toISOString(),active:true}));closeModal();toast('تم تسجيل بيع الجيجات ✅');showLine(lineId)}
+function openExtraGbHistoryV25(lineId){const l=state.lines.find(x=>x.id===lineId);if(!l)return;const rows=(state.extraGbSales||[]).filter(x=>x.lineId===lineId&&x.active!==false).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));modal('📦 سجل البيع الإضافي — '+l.owner,`<div class="cards-list">${rows.map(x=>`<div class="result-card"><div class="type">${esc(x.cycleDue)} • ${num(x.gb)}GB</div><h4>${esc(x.name||'بيع إضافي')} • ${money(x.amount)}</h4><p>${x.phone?esc(x.phone)+' • ':''}محصل ${money(x.paid??x.amount)}${x.notes?' • '+esc(x.notes):''}</p></div>`).join('')||'<div class="empty">لم يتم تسجيل بيع إضافي بعد</div>'}</div>`,`<button class="btn secondary" onclick="openExtraGbSaleV25('${lineId}')">رجوع</button>`)}
+window.openExtraGbSaleV25=openExtraGbSaleV25;window.extraGbCalcV25=extraGbCalcV25;window.saveExtraGbSaleV25=saveExtraGbSaleV25;window.openExtraGbHistoryV25=openExtraGbHistoryV25;
+
+/* ===== smart distribution ===== */
+function reservationItemsV25(network,group){return (state.reservations||[]).filter(r=>reservationActiveV25(r)&&r.network===network&&targetLabelV25(r)===group).map(r=>({id:r.id,name:r.name||r.phone,phone:r.phone,gb:Number(r.package||0),amount:Number(r.amount||0),density:Number(r.package||0)>0?Number(r.amount||0)/Number(r.package||1):0})).filter(x=>x.gb>0)}
+function defaultNewLineSpecV25(network,group){
+  const candidates=state.lines.filter(l=>l.active&&l.network===network&&l.group===group&&Number(l.capacityGb||0)>=150);const costs=candidates.map(l=>Number(l.cost||0)).filter(Boolean);
+  const cost=costs.length?costs.sort((a,b)=>a-b)[Math.floor(costs.length/2)]:Number(state.settings.smartDefaultCost?.[network]||(network==='اتصالات'?2200:1700));
+  return{capacity:Number(state.settings.smartDefaultCapacity?.[network]||200),members:Number(state.settings.smartDefaultMembers?.[network]||(network==='اتصالات'?7:6)),cost};
+}
+function optimizeNewBinsProfitV25(items,spec,k){
+  if(!Array.isArray(items)||!items.length||!(k>0))return [];
+  if(k===1){const gb=items.reduce((s,x)=>s+x.gb,0);if(items.length<=spec.members&&gb<=spec.capacity)return[{kind:'new',index:1,remainingGb:spec.capacity-gb,slots:spec.members-items.length,baseSales:0,cost:spec.cost,assigned:items.slice(),capacity:spec.capacity,maxMembers:spec.members}];return null}
+  let rem=items.slice(),out=[];
+  for(let bi=1;bi<k;bi++){
+    const binsLeft=k-bi;
+    const totalGb=rem.reduce((s,x)=>s+x.gb,0),totalCount=rem.length;
+    /* DP over slots + GB. Keep the highest-sales combination for this line. On equal sales, prefer fewer GB so valuable capacity stays available for later extra-GB sales. */
+    let dp=new Map();dp.set('0|0',{rev:0,gb:0,slots:0,ids:[]});
+    for(const it of rem){
+      const snap=[...dp.values()];
+      for(const st of snap){
+        const ns=st.slots+1,ng=st.gb+it.gb;if(ns>spec.members||ng>spec.capacity)continue;
+        const nr=st.rev+it.amount,key=ns+'|'+ng,old=dp.get(key),cand={rev:nr,gb:ng,slots:ns,ids:st.ids.concat(it.id)};
+        if(!old||nr>old.rev||(nr===old.rev&&ng<old.gb))dp.set(key,cand);
+      }
+    }
+    let best=null;
+    for(const st of dp.values()){
+      if(!st.slots)continue;
+      const leftCount=totalCount-st.slots,leftGb=totalGb-st.gb;
+      if(leftCount>binsLeft*spec.members||leftGb>binsLeft*spec.capacity)continue;
+      /* Revenue first. If two choices earn the same, deliberately keep more GB unsold on this line. */
+      if(!best||st.rev>best.rev||(st.rev===best.rev&&st.gb<best.gb)||(st.rev===best.rev&&st.gb===best.gb&&st.slots<best.slots))best=st;
+    }
+    if(!best)return null;
+    const chosenSet=new Set(best.ids),chosen=rem.filter(x=>chosenSet.has(x.id));
+    if(!chosen.length)return null;
+    out.push({kind:'new',index:bi,remainingGb:spec.capacity-best.gb,slots:spec.members-best.slots,baseSales:0,cost:spec.cost,assigned:chosen,capacity:spec.capacity,maxMembers:spec.members});
+    rem=rem.filter(x=>!chosenSet.has(x.id));
+  }
+  const lastGb=rem.reduce((s,x)=>s+x.gb,0);if(rem.length>spec.members||lastGb>spec.capacity)return null;
+  out.push({kind:'new',index:k,remainingGb:spec.capacity-lastGb,slots:spec.members-rem.length,baseSales:0,cost:spec.cost,assigned:rem.slice(),capacity:spec.capacity,maxMembers:spec.members});
+  return out;
+}
+function smartPlanV25(network,group){
+  const items=reservationItemsV25(network,group),remaining=items.slice(),placements=[];
+  const lines=state.lines.filter(l=>l.active&&l.network===network&&l.group===group).map(l=>{const m=lineMetrics(l),f=lineFinancials(l);return{kind:'existing',line:l,remainingGb:Math.max(0,Number(m.remaining||0)),slots:Math.max(0,Number(m.vacancies||0)),baseSales:Number(f.totalDue||0),cost:Number(l.cost||0),assigned:[]}}).filter(x=>x.remainingGb>0&&x.slots>0);
+  /* Existing lines first. Under-covered lines get priority; each step chooses the reservation that improves invoice coverage efficiently. */
+  while(remaining.length){
+    let best=null;
+    for(const ln of lines){if(ln.slots<=0||ln.remainingGb<=0)continue;const assignedSales=ln.assigned.reduce((s,x)=>s+x.amount,0),need=Math.max(0,ln.cost-(ln.baseSales+assignedSales));
+      for(const it of remaining){if(it.gb>ln.remainingGb)continue;const afterRem=ln.remainingGb-it.gb,cover=Math.min(need,it.amount);let score=0;if(need>0)score=100000+cover*100+it.density*25-it.gb*.2-(it.amount>need?Math.min(it.amount-need,500)*.05:0);else score=50000+it.amount*20+it.density*25-afterRem*.05;score+=Math.max(0,20-afterRem)*2;if(!best||score>best.score)best={ln,it,score};}
+    }
+    if(!best)break;best.ln.assigned.push(best.it);best.ln.remainingGb-=best.it.gb;best.ln.slots--;remaining.splice(remaining.findIndex(x=>x.id===best.it.id),1);
+  }
+  for(const ln of lines)if(ln.assigned.length)placements.push(ln);
+  /* Remaining bookings: 200GB-only default for new Etisalat lines; WE uses its own independent spec. */
+  const spec=defaultNewLineSpecV25(network,group),bins=[];
+  const sorted=remaining.slice().sort((a,b)=>b.gb-a.gb||b.density-a.density||b.amount-a.amount);
+  for(const it of sorted){let choices=bins.filter(b=>b.remainingGb>=it.gb&&b.slots>0).sort((a,b)=>(a.remainingGb-it.gb)-(b.remainingGb-it.gb)||a.slots-b.slots);let bin=choices[0];if(!bin){bin={kind:'new',index:bins.length+1,remainingGb:spec.capacity,slots:spec.members,baseSales:0,cost:spec.cost,assigned:[],capacity:spec.capacity,maxMembers:spec.members};bins.push(bin)}bin.assigned.push(it);bin.remainingGb-=it.gb;bin.slots--;}
+  /* Repack the minimum number of proposed new lines by profitability, not by the need to hit 200GB exactly. A 170GB line that earns more can be preferred; its remaining GB stay as sellable inventory. */
+  const profitBins=optimizeNewBinsProfitV25(remaining,spec,bins.length);placements.push(...(profitBins||bins));
+  return{network,group,items,placements,spec};
+}
+function planCardV25(p){const added=p.assigned.reduce((s,x)=>s+x.amount,0),gb=p.assigned.reduce((s,x)=>s+x.gb,0),finalSales=Number(p.baseSales||0)+added,profit=finalSales-Number(p.cost||0),need=Math.max(0,Number(p.cost||0)-finalSales),title=p.kind==='existing'?`${p.line.owner} • ****${String(p.line.number).slice(-4)}`:`خط ${p.index} جديد ${p.capacity||200}GB`,items=p.assigned.map(x=>`${x.gb}GB — ${x.name}`).join(' + ');return `<article class="smart-plan-card ${profit>=0?'covered':'needs'}"><div class="smart-plan-head"><h4>${esc(title)}</h4><span class="pill ${profit>=0?'good':'warn'}">${profit>=0?'الفاتورة مغطاة':'لم يغطِّ الفاتورة بعد'}</span></div><p class="smart-packages">${esc(items)}</p><div class="smart-numbers"><span>جيجات الحجوزات <b>${num(gb)}GB</b></span><span>مبيعات مضافة <b>${money(added)}</b></span><span>إجمالي مبيعات الخط <b>${money(finalSales)}</b></span><span>فاتورة الخط <b>${money(p.cost)}</b></span><span>المتبقي بعد الاقتراح <b>${num(p.remainingGb)}GB</b></span><span>أماكن متبقية <b>${num(p.slots)}</b></span></div><div class="smart-result ${profit>=0?'good':'warn'}">${profit>=0?`ربح متوقع ${money(profit)} — ويمكن بيع ${num(p.remainingGb)}GB المتبقية كإضافي`:`متبقي ${money(need)} لتغطية الفاتورة — ويوجد ${num(p.remainingGb)}GB للبيع`}</div></article>`}
+function openSmartAnalysisV25(network){
+  const group=targetGroupForV25(network,new Date()),plan=smartPlanV25(network,group),totalGb=plan.items.reduce((s,x)=>s+x.gb,0),totalSales=plan.items.reduce((s,x)=>s+x.amount,0),existing=plan.placements.filter(x=>x.kind==='existing').length,newLines=plan.placements.filter(x=>x.kind==='new').length;
+  modal(`🧠 تحليل ${network} — ${group}`,`<div class="alert good"><b>التحليل منفصل حسب الشبكة والدورة.</b><br>الحجوزات هنا لا تدخل في الحسابات الفعلية قبل التفعيل.</div><div class="smart-summary"><div><span>الحجوزات</span><b>${num(plan.items.length)}</b></div><div><span>إجمالي الجيجات</span><b>${num(totalGb)}GB</b></div><div><span>مبيعات متوقعة</span><b>${money(totalSales)}</b></div><div><span>خطوط حالية مستخدمة</span><b>${num(existing)}</b></div><div><span>خطوط جديدة مقترحة</span><b>${num(newLines)}</b></div></div>${network==='اتصالات'?'<div class="alert warn">قاعدة اتصالات: لا يتم اقتراح خط 70GB جديد؛ الخط الجديد الافتراضي 200GB. الخطوط الموجودة بالفعل يمكن الاستفادة من الأماكن والجيجات الفارغة فيها.</div>':'<div class="alert warn">تحليل WE مستقل ويحسب السعة الفعلية للخطوط الحالية بما فيها الجيجات المرحلة.</div>'}<div class="cards-list smart-plan-list">${plan.placements.map(planCardV25).join('')||'<div class="empty">لا توجد حجوزات لهذه الدورة حاليًا</div>'}</div><div class="alert good">الهدف ليس بيع 200GB كاملة بأي ثمن؛ الأفضل أن يغطي الخط فاتورته ويحقق ربحًا، وتظل الجيجات المتبقية مخزونًا للبيع الإضافي.</div>`,`<button class="btn secondary" onclick="openReservations()">رجوع للحجوزات</button>`);
+}
+window.smartPlanV25=smartPlanV25;window.openSmartAnalysisV25=openSmartAnalysisV25;
+
+/* ===== dashboard + line UI augmentation ===== */
+const _renderDashboardV25Base=renderDashboard;
+renderDashboard=function(){
+  _renderDashboardV25Base();
+  const bills=lineBillAlertsV25();
+  const page=$('#page-dashboard');
+  if(page&&bills.length){const total=bills.reduce((s,x)=>s+x.i.remaining,0),box=document.createElement('div');box.className='line-bill-alert-v25';box.innerHTML=`<div><b>⚠️ ${num(bills.length)} فواتير خطوط متأخرة</b><span>إجمالي المتبقي ${money(total)}</span></div><button class="btn small warn" onclick="openLineBillAlertsV25()">عرض الفواتير</button>`;page.prepend(box)}
+  $$('.final-group').forEach(card=>{const group=card.querySelector('.group-head h3')?.textContent?.trim();if(!group)return;const m=groupMetrics(group),rows=card.querySelector('.metric-rows');if(!rows||rows.querySelector('.v25-group-fin'))return;const profitRow=[...rows.querySelectorAll('.metric-row')].find(x=>x.textContent.includes('صافي الربح'));const html=`<div class="metric-row v25-group-fin interactive" onclick="showGroupDetails('${group}')"><span>إجمالي فواتير الدورة 🧾</span><b class="orange">${money(m.lineBills.total)}</b></div><div class="metric-row v25-group-fin interactive" onclick="openGroupLineBillsV25('${group}')"><span>المتبقي من فواتير الخطوط</span><b class="${m.lineBills.unpaidAmount?'red':'green'}">${num(m.lineBills.unpaidCount)} • ${money(m.lineBills.unpaidAmount)}</b></div>${m.lineBills.unknownCount?`<div class="metric-row v25-group-fin interactive" onclick="openGroupLineBillsV25('${group}')"><span>فواتير بحالة غير محددة</span><b class="orange">${num(m.lineBills.unknownCount)}</b></div>`:''}<div class="metric-row v25-group-fin interactive" onclick="showGroupDetails('${group}')"><span>إجمالي المبيعات 💳</span><b class="cyan">${money(m.totalSales)}</b></div><div class="metric-row v25-group-fin interactive" onclick="showGroupDetails('${group}')"><span>عملاء عليهم مبالغ متبقية</span><b class="${m.customerOutstanding?'red':'green'}">${num(m.customerUnpaidCount)} • ${money(m.customerOutstanding)}</b></div>`;if(profitRow)profitRow.insertAdjacentHTML('beforebegin',html);else rows.insertAdjacentHTML('beforeend',html)});
+  const hero=page?.querySelector('.reservation-hero');if(hero&&!hero.querySelector('.smart-analysis-home-v25'))hero.insertAdjacentHTML('beforeend',`<button class="btn secondary smart-analysis-home-v25" onclick="openSmartAnalysisV25('اتصالات')">🧠 تحليل اتصالات</button><button class="btn secondary smart-analysis-home-v25" onclick="openSmartAnalysisV25('WE')">🧠 تحليل WE</button>`);
+  stampBrandV25();
+};
+function openLineBillAlertsV25(){const rows=lineBillAlertsV25();modal('⚠️ فواتير الخطوط المتأخرة',`<div class="cards-list">${rows.map(x=>`<div class="result-card clickable-card" onclick="openLineBillV25('${x.l.id}')"><h4>${esc(x.l.owner)} • ****${esc(String(x.l.number).slice(-4))}</h4><p>${esc(x.l.group)} • متبقي ${money(x.i.remaining)} • متأخرة ${num(x.i.overdueDays)} يوم</p></div>`).join('')||'<div class="empty">لا توجد فواتير متأخرة</div>'}</div>`)}
+function openGroupLineBillsV25(group){const lines=state.lines.filter(l=>l.active&&l.group===group);modal('🧾 فواتير الخطوط — '+group,`<div class="cards-list">${lines.map(l=>{const i=lineBillInfoV25(l);return `<div class="result-card clickable-card" onclick="openLineBillV25('${l.id}')"><h4>${esc(l.owner)} • ****${esc(String(l.number).slice(-4))}</h4><p>الفاتورة ${money(i.amount)} • <span class="${i.status==='مدفوع'?'good':i.status==='غير محدد'?'warn':'bad'}">${esc(i.status)}</span> • متبقي ${money(i.remaining)}${i.overdueDays?` • متأخرة ${num(i.overdueDays)} يوم`:''}</p></div>`}).join('')||'<div class="empty">لا توجد خطوط</div>'}</div>`)}
+window.openLineBillAlertsV25=openLineBillAlertsV25;window.openGroupLineBillsV25=openGroupLineBillsV25;
+
+const _showLineV25Base=showLine;
+showLine=function(id){
+  _showLineV25Base(id);const l=state.lines.find(x=>x.id===id&&x.active);if(!l)return;const i=lineBillInfoV25(l),m=lineMetrics(l),f=lineFinancials(l),modalBody=$('#modalRoot .modal-body');if(!modalBody)return;
+  const finance=modalBody.querySelector('.finance-grid-final')||modalBody.querySelector('.line-finance');
+  if(finance&&!modalBody.querySelector('.line-accounting-v25'))finance.insertAdjacentHTML('afterend',`<section class="line-accounting-v25"><div class="line-health ${f.netProfit>=0?'covered':'needs'}"><div><span>${f.netProfit>=0?'✅ الفاتورة مغطاة':'⚠️ لم يغطِّ الفاتورة بعد'}</span><b>${f.netProfit>=0?`ربح ${money(f.netProfit)}`:`متبقي ${money(Math.max(0,Number(l.cost||0)-f.totalDue))} من المبيعات لتغطية الفاتورة`}</b></div><small>متاح للبيع الإضافي ${num(Math.max(0,m.remaining))}GB</small></div><div class="line-tools-v25"><button class="btn secondary" onclick="openLineBillV25('${id}')">🧾 فاتورة الخط • ${esc(i.status)} • ${num(paidLineBillCountV25(l))} مدفوعة</button><button class="btn good" onclick="openExtraGbSaleV25('${id}')">📦 بيع جيجات إضافية</button><button class="btn secondary" onclick="openSmartAnalysisV25('${l.network}')">🧠 تحليل حجوزات ${esc(l.network)}</button></div></section>`);
+};
+
+const _refreshLinesListV25Base=refreshLinesList;
+refreshLinesList=function(){
+  _refreshLinesListV25Base();
+  const cards=$$('#linesList .line-card');cards.forEach(card=>{const onclick=card.getAttribute('onclick')||'',id=(onclick.match(/showLine\('([^']+)'\)/)||[])[1],l=state.lines.find(x=>x.id===id);if(!l||card.querySelector('.line-v25-strip'))return;const i=lineBillInfoV25(l),f=lineFinancials(l),m=lineMetrics(l);const actions=card.querySelector('.line-card-actions');const strip=`<div class="line-v25-strip"><span class="${f.netProfit>=0?'good':'warn'}">${f.netProfit>=0?'✅ الفاتورة مغطاة + ربح '+money(f.netProfit):'⚠️ لم يغطِّ الفاتورة بعد — يحتاج '+money(Math.max(0,Number(l.cost||0)-f.totalDue))}</span><span>فاتورة: <b class="${i.status==='مدفوع'?'good':i.status==='غير محدد'?'warn':'bad'}">${esc(i.status)}</b></span><span>جيجات إضافية متاحة: <b>${num(Math.max(0,m.remaining))}GB</b></span></div>`;if(actions)actions.insertAdjacentHTML('beforebegin',strip);else card.insertAdjacentHTML('beforeend',strip)});
+};
+
+/* ===== settings ===== */
+const _renderMoreV25Base=renderMore;
+renderMore=function(){_renderMoreV25Base();const grid=$('#page-more .settings-grid');if(grid&&!grid.querySelector('.v25-bill-settings'))grid.insertAdjacentHTML('beforeend',`<div class="setting-card v25-bill-settings"><h3>🧾 تنبيه فواتير الخطوط</h3><p class="muted">التذكير يبدأ بعد عدد أيام من موعد تجديد الخط.</p><div class="field"><label>بعد كام يوم؟</label><select id="billReminderDaysV25" onchange="saveBillReminderV25(this.value)"><option value="4" ${Number(state.settings.lineBillReminderDays)===4?'selected':''}>4 أيام</option><option value="5" ${Number(state.settings.lineBillReminderDays)!==4?'selected':''}>5 أيام</option></select></div></div><div class="setting-card"><h3>🧠 التوزيع الذكي للحجوزات</h3><p class="muted">تحليل اتصالات وWE منفصل حسب دورة التفعيل الحالية، مع أولوية الخطوط الموجودة.</p><div class="actions"><button class="btn secondary small" onclick="openSmartAnalysisV25('اتصالات')">اتصالات</button><button class="btn secondary small" onclick="openSmartAnalysisV25('WE')">WE</button></div></div>`);stampBrandV25()};
+function saveBillReminderV25(v){state.settings.lineBillReminderDays=Number(v)===4?4:5;storageSet(STORAGE_KEY,JSON.stringify(state));toast('تم حفظ موعد التذكير')}
+window.saveBillReminderV25=saveBillReminderV25;
+
+/* ===== branding / splash ===== */
+function stampBrandV25(){
+  document.title='مدير الخطوط الجديد V2.5';
+  const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('.v24-version,#v24Badge,#v25Badge').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v25Badge" class="v24-version">V2.5</span>')}
+  const logo=document.querySelector('.topbar .brand-logo');if(logo&&!logo.querySelector('img'))logo.innerHTML='<img src="./icon-192.png" alt="وحش الباقات والعروض">';
+  const lockLogo=document.querySelector('#lockScreen .brand-logo');if(lockLogo&&!lockLogo.querySelector('img'))lockLogo.innerHTML='<img src="./icon-192.png" alt="وحش الباقات والعروض">';
+}
+function showSplashV25(){if(document.querySelector('#splashV25'))return;const s=document.createElement('div');s.id='splashV25';s.className='splash-v25';s.innerHTML='<div class="splash-wolf"><img src="./icon-512.png" alt=""><h1>مدير الخطوط <b>الجديد</b></h1><p>إدارة أسهل… أداء أقوى</p></div>';document.body.appendChild(s);setTimeout(()=>s.classList.add('hide'),850);setTimeout(()=>s.remove(),1250)}
+
+/* compatibility exports */
+window.targetGroupForV25=targetGroupForV25;window.openReservationModal=openReservationModal;window.findNumberConflictV25=findNumberConflictV25;
+
+ensureV25Data();stampBrandV25();showSplashV25();renderAll();
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+console.info('Manager Lines V2.5 active');
+})();
+
+</script>
 </body></html>

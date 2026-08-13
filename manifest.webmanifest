@@ -1,15 +1,15 @@
 {
-  "name": "مدير الخطوط V2.4",
+  "name": "مدير الخطوط الجديد V2.5",
   "short_name": "مدير الخطوط",
-  "description": "إدارة الخطوط والعملاء والتحصيل والحجوزات وشرائح Air/iHome",
+  "description": "إدارة الخطوط والعملاء والحجوزات وفواتير الخطوط والتحليل الذكي للربحية",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "./?app=v23",
+  "start_url": "./?app=v25",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#050818",
-  "theme_color": "#160d22",
+  "background_color": "#06020f",
+  "theme_color": "#0b0318",
   "icons": [
     {
       "src": "./icon-192.png",
