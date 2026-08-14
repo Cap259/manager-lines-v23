@@ -1,34 +1,19 @@
 {
-  "name": "مدير الخطوط الجديد V2.5",
+  "name": "مدير الخطوط الجديد V2.6",
   "short_name": "مدير الخطوط",
-  "description": "إدارة الخطوط والعملاء والحجوزات وفواتير الخطوط والتحليل الذكي للربحية",
+  "description": "إدارة الخطوط والعملاء والحجوزات وفواتير الخطوط والأسعار المرنة والتحليل الذكي للربحية",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "./?app=v25",
+  "start_url": "./?app=v26",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#06020f",
   "theme_color": "#0b0318",
   "icons": [
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    {"src":"./icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"./icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "id": "./"
 }

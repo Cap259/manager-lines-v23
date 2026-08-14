@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b0318" />
-<title>مدير الخطوط الجديد V2.5</title>
+<title>مدير الخطوط الجديد V2.6</title>
 
 <style>
 :root{
@@ -2072,4 +2072,356 @@ console.info('Manager Lines V2.5 active');
 })();
 
 </script>
+<style id="v26Styles">
+/* ===== V2.6 additions ===== */
+.v26-version{display:inline-flex;margin-right:7px;padding:3px 7px;border-radius:999px;border:1px solid rgba(168,85,247,.5);background:rgba(124,58,237,.16);color:#e9d5ff;font-size:10px;font-weight:900;vertical-align:middle}
+.v26-wire-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 14px}.v26-wire-tab{border:1px solid var(--line);background:#10091d;color:#c8bdd5;border-radius:14px;padding:11px;font-weight:800}.v26-wire-tab.active{background:linear-gradient(135deg,#6d28d9,#8b5cf6);color:#fff;border-color:#a78bfa;box-shadow:0 8px 24px rgba(124,58,237,.2)}
+.v26-wire-overview{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 0 12px}.v26-wire-overview .overview-card{background:linear-gradient(180deg,#17102a,#10091d);border:1px solid var(--line);border-radius:16px;padding:12px;cursor:pointer}.overview-card h3{margin:0 0 8px;font-size:15px}.overview-card .big{font-size:24px;font-weight:900}.overview-card .subrow{display:flex;justify-content:space-between;gap:8px;margin-top:7px;color:var(--muted);font-size:11px}
+.v26-fin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}.v26-fin-grid>div{background:#0e0918;border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:10px}.v26-fin-grid span{display:block;color:var(--muted);font-size:11px}.v26-fin-grid b{display:block;font-size:18px;margin-top:5px}
+.v26-dual-heroes{display:flex;gap:9px;align-items:stretch;justify-content:flex-start;flex-wrap:wrap}.vacancy-hero-v26,.gb-hero-v26{min-width:92px;border:1px solid rgba(139,92,246,.48);border-radius:15px;padding:8px 12px;text-align:center;background:linear-gradient(180deg,#160d26,#0e0918)}.vacancy-hero-v26 small,.gb-hero-v26 small{display:block;color:var(--muted);font-size:10px}.vacancy-hero-v26 strong,.gb-hero-v26 strong{display:inline-block;font-size:27px;line-height:1.1;margin-top:3px}.vacancy-hero-v26 em,.gb-hero-v26 em{font-style:normal;font-size:11px;margin-right:3px}.vacancy-hero-v26.good{border-color:rgba(34,197,94,.5);box-shadow:inset 0 0 20px rgba(34,197,94,.06)}.vacancy-hero-v26.warn{border-color:rgba(245,158,11,.55)}.vacancy-hero-v26.bad{border-color:rgba(239,68,68,.55)}
+.minutes-strip-v26{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:9px 0}.minutes-strip-v26>div{background:#100a1b;border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:8px}.minutes-strip-v26 span{display:block;font-size:10px;color:var(--muted)}.minutes-strip-v26 b{display:block;margin-top:4px;font-size:14px}.minute-member-v26{display:inline-flex;margin-right:6px;color:#f0d9ff;font-size:11px}
+.best-fit-card-v26{background:linear-gradient(180deg,#141027,#0d0918);border:1px solid #49306a;border-radius:17px;padding:13px;margin-bottom:9px}.best-fit-card-v26.best{border-color:rgba(34,197,94,.55);box-shadow:0 0 20px rgba(34,197,94,.05)}.best-fit-head-v26{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.best-fit-head-v26 h4{margin:0}.best-fit-reason-v26{margin:8px 0 0;color:#c9bdd6;font-size:12px;line-height:1.65}.best-fit-money-v26{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.best-fit-money-v26>span{background:#0b0713;border-radius:10px;padding:8px;font-size:10px;color:var(--muted)}.best-fit-money-v26 b{display:block;color:#fff;font-size:13px;margin-top:4px}
+.v26-price-toolbar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;margin:10px 0 16px;background:#0e0918;border:1px solid var(--line);border-radius:15px;padding:10px}.v26-price-section{margin-top:16px}.v26-price-row{display:grid;grid-template-columns:90px 80px 1fr 1fr auto;gap:7px;align-items:end;margin-bottom:7px}.v26-price-row.service{grid-template-columns:100px 1fr 90px 1fr 1fr auto}.v26-price-row .field{min-width:0}.v26-price-row input,.v26-price-row select{min-width:0}.v26-price-row .btn{align-self:end}
+.v26-search-card{background:linear-gradient(135deg,#211033,#120b21);border:1px solid #5f3a7d;border-radius:17px;padding:13px;margin-top:12px}.v26-search-card h3{margin:0 0 6px}.v26-search-card p{margin:0 0 10px;color:var(--muted);font-size:12px}
+.v26-breakdown{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.v26-breakdown>div{background:#0e0918;border:1px solid var(--line);border-radius:15px;padding:13px;text-align:center}.v26-breakdown span{display:block;color:var(--muted);font-size:11px}.v26-breakdown b{display:block;font-size:26px;margin-top:5px}
+.v26-smart-result-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:8px 0}.v26-smart-result-title h4{margin:0}
+@media(max-width:700px){.v26-price-toolbar{grid-template-columns:1fr 1fr}.v26-price-row,.v26-price-row.service{grid-template-columns:1fr 1fr}.v26-price-row .btn{grid-column:1/-1}.v26-fin-grid{grid-template-columns:1fr 1fr}.best-fit-money-v26{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.v26-wire-overview{grid-template-columns:1fr}.v26-dual-heroes{display:grid;grid-template-columns:1fr 1fr}.vacancy-hero-v26,.gb-hero-v26{min-width:0}.minutes-strip-v26{grid-template-columns:1fr 1fr 1fr}.v26-fin-grid{grid-template-columns:1fr 1fr}}
+</style>
+<script id="familyLinesV26Patch">
+/* FAMILY_LINES_PATCH_V26 — flexible pricing + minutes + wireless split + smart placement + navigation */
+(function(){
+'use strict';
+const V26='2.6';
+let _wirelessTabV26='iHome';
+let _pageHistoryV26=[];
+let _goingBackV26=false;
+let _wirelessReturnPageV26='wireless';
+
+const defaultLineMinutesV26=net=>net==='اتصالات'?12000:10000;
+const defaultMemberMinutesV26=gb=>Number(gb||0)>=40?2000:1500;
+const activeWirelessV26=()=> (state.wireless||[]).filter(w=>w.active!==false);
+const activeReservationsV26=()=> (state.reservations||[]).filter(r=>r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي');
+function cloneV26(o){return JSON.parse(JSON.stringify(o||{}))}
+function wireLabelV26(type){return type==='iHome'?'iHome اتصالات':'WE Air'}
+function safeTextV26(v){return String(v??'')}
+function currentMobileMapV26(net,type='customer'){
+  state.settings.customerPrices=state.settings.customerPrices||{WE:{},'اتصالات':{}};
+  state.settings.dealerPrices=state.settings.dealerPrices||{WE:{},'اتصالات':{}};
+  state.settings.customerPrices[net]=state.settings.customerPrices[net]||{};
+  state.settings.dealerPrices[net]=state.settings.dealerPrices[net]||{};
+  return type==='dealer'?state.settings.dealerPrices[net]:state.settings.customerPrices[net];
+}
+function mobilePriceExistsV26(net,gb,type='customer'){
+  const m=currentMobileMapV26(net,type),k=String(Number(gb||0));
+  return Object.prototype.hasOwnProperty.call(m,k)&&Number.isFinite(Number(m[k]));
+}
+function setMobilePriceV26(net,gb,type,price){
+  gb=Number(gb||0);price=Number(price||0);if(!(gb>0)||price<0)return;
+  currentMobileMapV26(net,type)[String(gb)]=price;
+  if(type==='customer'){
+    if(net==='WE')state.settings.wePrices=cloneV26(state.settings.customerPrices.WE);
+    else state.settings.etisalatPrices=cloneV26(state.settings.customerPrices['اتصالات']);
+  }
+  syncCatalogMobileV26(net,gb);
+}
+function syncCatalogMobileV26(net,gb){
+  state.settings.priceCatalogV26=state.settings.priceCatalogV26||[];
+  gb=Number(gb||0);if(!(gb>0))return;
+  let x=state.settings.priceCatalogV26.find(x=>x.category==='موبايل'&&x.network===net&&Number(x.gb)===gb);
+  if(!x){x={id:uid('pc'),category:'موبايل',network:net,name:`${gb}GB`,gb};state.settings.priceCatalogV26.push(x)}
+  x.customerPrice=Number(currentMobileMapV26(net,'customer')[String(gb)]||0);
+  x.dealerPrice=Number(currentMobileMapV26(net,'dealer')[String(gb)]??x.customerPrice??0);
+}
+function syncCatalogV26(){
+  state.settings.priceCatalogV26=state.settings.priceCatalogV26||[];
+  for(const net of ['WE','اتصالات']){
+    const keys=new Set([...Object.keys(currentMobileMapV26(net,'customer')),...Object.keys(currentMobileMapV26(net,'dealer'))]);
+    keys.forEach(k=>syncCatalogMobileV26(net,Number(k)));
+  }
+  const wmap=state.settings.wirelessPrices||{};
+  Object.entries(wmap).forEach(([name,price])=>{
+    const type=name.startsWith('iHome')?'iHome':name.startsWith('WE Air')?'WE Air':'';if(!type)return;
+    const gb=Number(name.match(/\d+/)?.[0]||0);
+    let x=state.settings.priceCatalogV26.find(x=>x.category===type&&Number(x.gb)===gb);
+    if(!x){x={id:uid('pc'),category:type,network:type==='iHome'?'اتصالات':'WE',name,gb};state.settings.priceCatalogV26.push(x)}
+    x.customerPrice=Number(price||0);x.dealerPrice=Number(x.dealerPrice??price??0);
+  });
+}
+function ensureV26Data(){
+  state.settings=state.settings||{};
+  state.settings.priceCatalogV26=state.settings.priceCatalogV26||[];
+  state.settings.wirelessPrices=state.settings.wirelessPrices||{'WE Air 90':350,'WE Air 325':750,'iHome 140':450,'iHome 225':550};
+  for(const l of state.lines||[]){if(l.minutesTotal==null)l.minutesTotal=defaultLineMinutesV26(l.network)}
+  for(const c of state.customers||[]){if(c.minutes==null)c.minutes=defaultMemberMinutesV26(c.gb)}
+  for(const r of state.reservations||[]){if(r.minutes==null)r.minutes=defaultMemberMinutesV26(r.package)}
+  syncCatalogV26();
+  state.settings.appVersion=V26;state.settings.routerRentalEnabled=false;
+  state.schemaVersion=Math.max(Number(state.schemaVersion||1),7);
+  storageSet(STORAGE_KEY,JSON.stringify(state));
+}
+
+/* ===== pricing ===== */
+function unpricedDecisionV26(net,gb,type,currentPrice){
+  gb=Number(gb||0);currentPrice=Number(currentPrice||0);
+  if(!(gb>0)||mobilePriceExistsV26(net,gb,type))return{ok:true,price:currentPrice};
+  const label=type==='dealer'?'سعر التاجر':'سعر العميل';
+  if(confirm(`⚠️ باقة ${gb}GB على ${net} غير مسجلة في جدول الأسعار (${label}).\n\nهل تريد إضافتها بالسعر الحالي ${money(currentPrice)}؟`)){
+    setMobilePriceV26(net,gb,type,currentPrice);storageSet(STORAGE_KEY,JSON.stringify(state));
+    return{ok:true,price:currentPrice,added:true};
+  }
+  if(confirm('هل تريد استخدام هذا السعر لهذه العملية فقط بدون إضافته لجدول الأسعار؟'))return{ok:true,price:currentPrice,once:true};
+  const changed=prompt(`اكتب السعر الجديد الذي تريد اعتماده لباقة ${gb}GB، أو اضغط إلغاء لرفض العملية:`,String(currentPrice||''));
+  if(changed===null||String(changed).trim()==='')return{ok:false,price:currentPrice};
+  const p=Number(arToEnDigits(changed));if(!(p>=0))return{ok:false,price:currentPrice};
+  setMobilePriceV26(net,gb,type,p);storageSet(STORAGE_KEY,JSON.stringify(state));
+  return{ok:true,price:p,added:true};
+}
+function priceRowsHtmlV26(net){
+  const cust=currentMobileMapV26(net,'customer'),dealer=currentMobileMapV26(net,'dealer');
+  const keys=[...new Set([...Object.keys(cust),...Object.keys(dealer)])].sort((a,b)=>Number(a)-Number(b));
+  return keys.map(k=>`<div class="v26-price-row"><div class="field"><label>الشبكة</label><input disabled value="${esc(net)}"></div><div class="field"><label>الباقة</label><input disabled value="${esc(k)}GB"></div><div class="field"><label>سعر العميل</label><input class="v26MobilePrice" data-net="${esc(net)}" data-type="customer" data-gb="${esc(k)}" type="number" min="0" value="${Number(cust[k]||0)}"></div><div class="field"><label>سعر التاجر</label><input class="v26MobilePrice" data-net="${esc(net)}" data-type="dealer" data-gb="${esc(k)}" type="number" min="0" value="${Number(dealer[k]??cust[k]??0)}"></div><button class="btn bad small" type="button" onclick="deleteMobilePriceV26('${net}','${k}')">حذف</button></div>`).join('');
+}
+function customServiceRowsV26(){
+  return (state.settings.priceCatalogV26||[]).filter(x=>!['موبايل','iHome','WE Air'].includes(x.category)).map(x=>`<div class="v26-price-row service"><div class="field"><label>التصنيف</label><input disabled value="${esc(x.category)}"></div><div class="field"><label>الاسم</label><input class="v26CatalogName" data-id="${x.id}" value="${esc(x.name||'')}"></div><div class="field"><label>GB</label><input class="v26CatalogGb" data-id="${x.id}" type="number" min="0" value="${Number(x.gb||0)}"></div><div class="field"><label>سعر العميل</label><input class="v26CatalogCustomer" data-id="${x.id}" type="number" min="0" value="${Number(x.customerPrice||0)}"></div><div class="field"><label>سعر التاجر</label><input class="v26CatalogDealer" data-id="${x.id}" type="number" min="0" value="${Number(x.dealerPrice??x.customerPrice??0)}"></div><button class="btn bad small" type="button" onclick="deleteCatalogItemV26('${x.id}')">حذف</button></div>`).join('')||'<div class="hint">لا توجد خدمات إضافية مسجلة بعد.</div>';
+}
+window.openPrices=function(){
+  syncCatalogV26();
+  const wireless=Object.entries(state.settings.wirelessPrices||{}).sort().map(([name,p])=>`<div class="v26-price-row"><div class="field"><label>النوع</label><input disabled value="هوائي"></div><div class="field"><label>الباقة</label><input disabled value="${esc(name)}"></div><div class="field"><label>السعر</label><input class="v26WirePrice" data-name="${esc(name)}" type="number" min="0" value="${Number(p||0)}"></div><div></div><button class="btn bad small" type="button" onclick="deleteWirelessPriceV26('${esc(name)}')">حذف</button></div>`).join('');
+  const body=`<div class="alert good"><b>جدول أسعار مرن.</b> يمكنك إضافة أي باقة أو خدمة. تغيير السعر هنا يطبّق على التسجيلات الجديدة فقط ولا يغيّر أسعار العملاء المسجلين.</div>
+  <div class="v26-price-toolbar"><div class="field"><label>الشبكة</label><select id="pcNetV26"><option>اتصالات</option><option>WE</option><option>عام</option></select></div><div class="field"><label>التصنيف</label><select id="pcCatV26"><option>موبايل</option><option>جيجات إضافية</option><option>iHome</option><option>WE Air</option><option>خدمة أخرى</option></select></div><div class="field"><label>الاسم</label><input id="pcNameV26" placeholder="مثال 25GB"></div><div class="field"><label>الجيجات (اختياري)</label><input id="pcGbV26" type="number" min="0" placeholder="25"></div><div class="field"><label>سعر العميل</label><input id="pcCustomerV26" type="number" min="0"></div><button class="btn small" type="button" onclick="addCatalogItemV26()">+ إضافة</button><div class="field"><label>سعر التاجر</label><input id="pcDealerV26" type="number" min="0"></div></div>
+  <div class="v26-price-section"><h4>💚 باقات اتصالات</h4>${priceRowsHtmlV26('اتصالات')}</div>
+  <div class="v26-price-section"><h4>💜 باقات WE</h4>${priceRowsHtmlV26('WE')}</div>
+  <div class="v26-price-section"><h4>📡 iHome / WE Air</h4>${wireless}</div>
+  <div class="v26-price-section"><h4>➕ خدمات وباقات إضافية</h4>${customServiceRowsV26()}</div>`;
+  modal('💵 الأسعار والباقات',body,'<button class="btn" onclick="savePricesV26()">حفظ كل التعديلات</button>');
+};
+function addCatalogItemV26(){
+  const net=$('#pcNetV26')?.value||'عام',cat=$('#pcCatV26')?.value||'خدمة أخرى',gb=Number($('#pcGbV26')?.value||0),cp=Number($('#pcCustomerV26')?.value||0),dp=Number($('#pcDealerV26')?.value||cp),name=($('#pcNameV26')?.value||'').trim()||(gb?`${gb}GB`:cat);
+  if(cat==='موبايل'){
+    if(!['WE','اتصالات'].includes(net))return alert('اختار WE أو اتصالات لباقات الموبايل');if(!(gb>0))return alert('اكتب عدد الجيجات');
+    setMobilePriceV26(net,gb,'customer',cp);setMobilePriceV26(net,gb,'dealer',dp);
+  }else if(cat==='iHome'||cat==='WE Air'){
+    if(!(gb>0))return alert('اكتب عدد الجيجات');const key=`${cat} ${gb}`;state.settings.wirelessPrices[key]=cp;
+    let x=state.settings.priceCatalogV26.find(x=>x.category===cat&&Number(x.gb)===gb);if(!x){x={id:uid('pc'),category:cat,network:cat==='iHome'?'اتصالات':'WE',gb,name:key};state.settings.priceCatalogV26.push(x)}x.customerPrice=cp;x.dealerPrice=dp;
+  }else{
+    state.settings.priceCatalogV26.push({id:uid('pc'),category:cat,network:net,name,gb,customerPrice:cp,dealerPrice:dp});
+  }
+  storageSet(STORAGE_KEY,JSON.stringify(state));toast('تمت إضافة الباقة/الخدمة');openPrices();
+}
+function savePricesV26(){
+  commit('تعديل جدول الأسعار',()=>{
+    $$('.v26MobilePrice').forEach(i=>setMobilePriceV26(i.dataset.net,Number(i.dataset.gb),i.dataset.type,Number(i.value||0)));
+    $$('.v26WirePrice').forEach(i=>state.settings.wirelessPrices[i.dataset.name]=Number(i.value||0));
+    for(const x of state.settings.priceCatalogV26||[]){
+      const n=document.querySelector(`.v26CatalogName[data-id="${x.id}"]`),g=document.querySelector(`.v26CatalogGb[data-id="${x.id}"]`),c=document.querySelector(`.v26CatalogCustomer[data-id="${x.id}"]`),d=document.querySelector(`.v26CatalogDealer[data-id="${x.id}"]`);
+      if(n)x.name=n.value;if(g)x.gb=Number(g.value||0);if(c)x.customerPrice=Number(c.value||0);if(d)x.dealerPrice=Number(d.value||0);
+    }
+    syncCatalogV26();
+  });closeModal();
+}
+function deleteMobilePriceV26(net,gb){if(!confirm(`حذف باقة ${gb}GB من أسعار ${net}؟ الأسعار القديمة للعملاء لن تتغير.`))return;delete currentMobileMapV26(net,'customer')[String(gb)];delete currentMobileMapV26(net,'dealer')[String(gb)];state.settings.priceCatalogV26=state.settings.priceCatalogV26.filter(x=>!(x.category==='موبايل'&&x.network===net&&Number(x.gb)===Number(gb)));if(net==='WE')state.settings.wePrices=cloneV26(state.settings.customerPrices.WE);else state.settings.etisalatPrices=cloneV26(state.settings.customerPrices['اتصالات']);storageSet(STORAGE_KEY,JSON.stringify(state));openPrices()}
+function deleteWirelessPriceV26(name){if(!confirm('حذف '+name+' من جدول الأسعار؟'))return;delete state.settings.wirelessPrices[name];state.settings.priceCatalogV26=state.settings.priceCatalogV26.filter(x=>x.name!==name);storageSet(STORAGE_KEY,JSON.stringify(state));openPrices()}
+function deleteCatalogItemV26(id){if(!confirm('حذف هذه الخدمة من جدول الأسعار؟'))return;state.settings.priceCatalogV26=state.settings.priceCatalogV26.filter(x=>x.id!==id);storageSet(STORAGE_KEY,JSON.stringify(state));openPrices()}
+Object.assign(window,{addCatalogItemV26,savePricesV26,deleteMobilePriceV26,deleteWirelessPriceV26,deleteCatalogItemV26});
+
+/* ===== minutes: tracking only, never used by profitability/smart placement ===== */
+function lineMinuteMetricsV26(l){const cs=state.customers.filter(c=>c.active&&c.lineId===l.id),allocated=cs.reduce((s,c)=>s+Number(c.minutes||0),0),total=Number(l.minutesTotal??defaultLineMinutesV26(l.network));return{total,allocated,remaining:total-allocated}}
+const _openLineModalV26Base=openLineModal;
+openLineModal=function(id=''){
+  const r=_openLineModalV26Base.apply(this,arguments),l=id?state.lines.find(x=>x.id===id):null;
+  setTimeout(()=>{if($('#fLineMinutes'))return;const max=$('#fLineMax')?.closest('.field');if(!max)return;const f=document.createElement('div');f.className='field';f.innerHTML=`<label>إجمالي دقائق الخط (للمتابعة فقط)</label><input id="fLineMinutes" type="number" min="0" value="${Number(l?.minutesTotal??defaultLineMinutesV26($('#fLineNet')?.value||'WE'))}" oninput="this.dataset.manual='1'"><span class="hint">لا تدخل الدقائق في الربحية أو اقتراح التوزيع.</span>`;max.after(f)},0);return r;
+};
+const _lineFormNetworkChangedV26Base=typeof lineFormNetworkChanged==='function'?lineFormNetworkChanged:null;
+if(_lineFormNetworkChangedV26Base)lineFormNetworkChanged=function(){const r=_lineFormNetworkChangedV26Base.apply(this,arguments);const m=$('#fLineMinutes');if(m&&!m.dataset.manual)m.value=defaultLineMinutesV26($('#fLineNet')?.value||'WE');return r};
+const _saveLineV26Base=saveLine;
+saveLine=function(id=''){
+  const minutes=Number($('#fLineMinutes')?.value||defaultLineMinutesV26($('#fLineNet')?.value||'WE')),number=$('#fLineNumber')?.value?.trim(),before=new Set((state.lines||[]).map(x=>x.id));
+  const r=_saveLineV26Base.apply(this,arguments);
+  let l=id?state.lines.find(x=>x.id===id):state.lines.find(x=>!before.has(x.id))||[...state.lines].reverse().find(x=>x.number===number);if(l){l.minutesTotal=minutes;storageSet(STORAGE_KEY,JSON.stringify(state));renderAll()}return r;
+};
+
+const _openCustomerModalV26Base=openCustomerModal;
+openCustomerModal=function(id='',prefill=null){
+  const r=_openCustomerModalV26Base.apply(this,arguments);const c=id?state.customers.find(x=>x.id===id):null;
+  setTimeout(()=>{if($('#fCustMinutes'))return;const gb=$('#fCustGb')?.closest('.field');if(!gb)return;const f=document.createElement('div');f.className='field';f.innerHTML=`<label>الدقائق المخصصة (هدية)</label><input id="fCustMinutes" type="number" min="0" value="${Number(c?.minutes??prefill?.minutes??defaultMemberMinutesV26($('#fCustGb')?.value||0))}" oninput="this.dataset.manual='1'"><span class="hint">أقل من 40GB = 1500 دقيقة، و40GB فأكثر = 2000 افتراضيًا. يمكنك تعديلها أو تصفيرها.</span>`;gb.after(f)},0);return r;
+};
+const _custPackageTypedV26Base=custPackageTyped;
+custPackageTyped=function(){const r=_custPackageTypedV26Base.apply(this,arguments);const m=$('#fCustMinutes');if(m&&!m.dataset.manual)m.value=defaultMemberMinutesV26($('#fCustGb')?.value||0);return r};
+const _saveCustomerV26Base=saveCustomer;
+saveCustomer=function(id='',after='close'){
+  const activatingReservationV26=(!id&&typeof _activatingReservationIdV25!=='undefined')?_activatingReservationIdV25:'';
+  const gb=Number(arToEnDigits($('#fCustGb')?.value||0)),net=$('#fCustNet')?.value||'WE',type=$('#fCustType')?.value||'customer',priceInput=$('#fCustPrice'),price=Number(priceInput?.value||0),minutes=Number($('#fCustMinutes')?.value||defaultMemberMinutesV26(gb)),phone=arToEnDigits($('#fCustPhone')?.value||''),before=new Set((state.customers||[]).map(c=>c.id));
+  const d=unpricedDecisionV26(net,gb,type,price);if(!d.ok)return;if(priceInput&&d.price!==price)priceInput.value=d.price;
+  const r=_saveCustomerV26Base.apply(this,arguments);
+  let c=id?state.customers.find(x=>x.id===id):state.customers.find(x=>x.phone===phone&&!before.has(x.id));if(c){c.minutes=minutes;storageSet(STORAGE_KEY,JSON.stringify(state));if(currentPage==='customer-detail'&&currentCustomerId===c.id)renderCustomerDetail()}
+  if(activatingReservationV26&&c){setTimeout(()=>{goBackV26();openReservations()},20)}
+  return r;
+};
+
+const _openReservationV26Base=openReservationModal;
+openReservationModal=function(id=''){
+  const r=_openReservationV26Base.apply(this,arguments),res=id?state.reservations.find(x=>x.id===id):null;
+  setTimeout(()=>{if($('#rvMinutes'))return;const pack=$('#rvPackManual')?.closest('.field');if(!pack)return;const f=document.createElement('div');f.className='field';f.innerHTML=`<label>الدقائق المتوقعة (هدية)</label><input id="rvMinutes" type="number" min="0" value="${Number(res?.minutes??defaultMemberMinutesV26($('#rvPackManual')?.value||0))}" oninput="this.dataset.manual='1'"><span class="hint">للمتابعة فقط ولا تؤثر على اقتراح التوزيع.</span>`;pack.after(f)},0);return r;
+};
+const _reservationPackageTypedV26Base=reservationPackageTypedV25;
+reservationPackageTypedV25=function(){const r=_reservationPackageTypedV26Base.apply(this,arguments);const m=$('#rvMinutes');if(m&&!m.dataset.manual)m.value=defaultMemberMinutesV26($('#rvPackManual')?.value||0);return r};
+window.reservationPackageTypedV25=reservationPackageTypedV25;
+const _saveReservationV26Base=saveReservationV25;
+saveReservationV25=function(id=''){
+  const gb=Number(arToEnDigits($('#rvPackManual')?.value||0)),net=$('#rvNet')?.value||'اتصالات',priceInput=$('#rvAmount'),price=Number(priceInput?.value||0),minutes=Number($('#rvMinutes')?.value||defaultMemberMinutesV26(gb)),phone=arToEnDigits($('#rvPhone')?.value||''),before=new Set((state.reservations||[]).map(r=>r.id));
+  const d=unpricedDecisionV26(net,gb,'customer',price);if(!d.ok)return;if(priceInput&&d.price!==price)priceInput.value=d.price;
+  const r=_saveReservationV26Base.apply(this,arguments);
+  let res=id?state.reservations.find(x=>x.id===id):state.reservations.find(x=>x.phone===phone&&!before.has(x.id));if(res){res.minutes=minutes;storageSet(STORAGE_KEY,JSON.stringify(state));}
+  if(id){openReservations()}else if(res){setTimeout(()=>showReservationPlacementSuggestionV26(res.id),40)}
+  return r;
+};
+window.saveReservationV25=saveReservationV25;
+
+if(typeof renderBulkRows==='function'){
+  const _renderBulkRowsV26Base=renderBulkRows;
+  renderBulkRows=function(){const r=_renderBulkRowsV26Base.apply(this,arguments);setTimeout(()=>{for(const row of _bulkRows||[]){const card=$('#bulkrow_'+row.id);if(!card||card.querySelector('[data-v26-minutes]'))continue;const fields=card.querySelector('.bulk-fields');if(!fields)continue;const f=document.createElement('div');f.className='field';f.setAttribute('data-v26-minutes','1');const val=Number(row.minutes??defaultMemberMinutesV26(row.gb));f.innerHTML=`<label>الدقائق</label><input type="number" min="0" value="${val}" oninput="bulkMinutesChangedV26('${row.id}',this.value)">`;fields.appendChild(f)}},0);return r};
+}
+function bulkMinutesChangedV26(id,v){const r=(_bulkRows||[]).find(x=>x.id===id);if(r){r.minutes=Number(v||0);r.minutesManual=true}}
+window.bulkMinutesChangedV26=bulkMinutesChangedV26;
+if(typeof bulkRowChanged==='function'){
+  const _bulkRowChangedV26Base=bulkRowChanged;bulkRowChanged=function(id,field,value){const r=_bulkRowChangedV26Base.apply(this,arguments),row=(_bulkRows||[]).find(x=>x.id===id);if(field==='gb'&&row&&!row.minutesManual){row.minutes=defaultMemberMinutesV26(row.gb);const inp=$(`#bulkrow_${id} [data-v26-minutes] input`);if(inp)inp.value=row.minutes}return r};
+}
+if(typeof saveBulkAddV2==='function'){
+  const _saveBulkAddV26Base=saveBulkAddV2;saveBulkAddV2=function(){const v=validateBulkRowsV2();if(v?.valid){for(const row of v.valid){const type=row.customerType==='dealer'?'dealer':'customer',d=unpricedDecisionV26(v.l.network,row.gb,type,row.price);if(!d.ok)return;row.price=d.price;const src=(_bulkRows||[]).find(x=>x.id===row.id);if(src)src.price=String(d.price)}}const before=new Set(state.customers.map(c=>c.id));const r=_saveBulkAddV26Base.apply(this,arguments);for(const c of state.customers.filter(c=>!before.has(c.id))){const src=(_bulkRows||[]).find(x=>x.phone===c.phone);c.minutes=Number(src?.minutes??defaultMemberMinutesV26(c.gb))}storageSet(STORAGE_KEY,JSON.stringify(state));return r};
+}
+if(typeof saveQuickSingle==='function'){
+  const _saveQuickSingleV26Base=saveQuickSingle;saveQuickSingle=function(again=true){const lid=$('#qsLine')?.value,l=state.lines.find(x=>x.id===lid),gb=Number(arToEnDigits($('#qsGb')?.value||0)),type=$('#qsCustType')?.value||'customer',priceInput=$('#qsPrice'),price=Number(priceInput?.value||0),before=new Set(state.customers.map(c=>c.id));if(l&&gb>0){const d=unpricedDecisionV26(l.network,gb,type,price);if(!d.ok)return;if(priceInput&&d.price!==price)priceInput.value=d.price}const r=_saveQuickSingleV26Base.apply(this,arguments);for(const c of state.customers.filter(c=>!before.has(c.id)))c.minutes=defaultMemberMinutesV26(c.gb);storageSet(STORAGE_KEY,JSON.stringify(state));return r};
+}
+
+function augmentMinuteViewsV26(){
+  $$('#linesList .line-card').forEach(card=>{if(card.querySelector('.minutes-strip-v26'))return;const id=(String(card.getAttribute('onclick')||'').match(/showLine\('([^']+)'\)/)||[])[1],l=state.lines.find(x=>x.id===id);if(!l)return;const mm=lineMinuteMetricsV26(l),target=card.querySelector('.capacity-strip');if(target)target.insertAdjacentHTML('afterend',`<div class="minutes-strip-v26"><div><span>إجمالي الدقائق</span><b>${num(mm.total)}</b></div><div><span>الموزع</span><b>${num(mm.allocated)}</b></div><div><span>المتبقي</span><b class="${mm.remaining<0?'bad':'good'}">${num(mm.remaining)}</b></div></div>`)});
+}
+const _refreshLinesListV26Base=refreshLinesList;
+refreshLinesList=function(){const r=_refreshLinesListV26Base.apply(this,arguments);augmentMinuteViewsV26();return r};
+const _showLineV26Base=showLine;
+showLine=function(id){const r=_showLineV26Base.apply(this,arguments),l=state.lines.find(x=>x.id===id&&x.active);if(!l)return r;const body=$('#modalRoot .modal-body');if(!body)return r;const mm=lineMinuteMetricsV26(l),finance=body.querySelector('.line-accounting-v25')||body.querySelector('.finance-grid-final')||body.firstElementChild;if(finance&&!body.querySelector('.v26-line-minutes'))finance.insertAdjacentHTML('afterend',`<section class="info-card v26-line-minutes"><h3>⏱️ الدقائق — متابعة فقط</h3><div class="minutes-strip-v26"><div><span>إجمالي الخط</span><b>${num(mm.total)}</b></div><div><span>الموزع</span><b>${num(mm.allocated)}</b></div><div><span>المتبقي</span><b class="${mm.remaining<0?'bad':'good'}">${num(mm.remaining)}</b></div></div>${mm.remaining<0?'<div class="alert warn">تم توزيع دقائق أكثر من الرصيد المسجل. هذا تنبيه فقط ولا يمنع الحفظ أو التوزيع.</div>':''}</section>`);
+  const cs=lineCustomers(id);const cards=[...body.querySelectorAll('.member-card')];cards.forEach((card,i)=>{const c=cs[i],p=card.querySelector('.member-head p');if(c&&p&&!p.querySelector('.minute-member-v26'))p.insertAdjacentHTML('beforeend',`<span class="minute-member-v26">• ${num(c.minutes||0)} دقيقة</span>`)});return r;
+};
+
+/* ===== wireless split + no router rental UI ===== */
+function wirelessSummaryV26(type){
+  const rows=activeWirelessV26().filter(w=>w.type===type),infos=rows.map(w=>({w,i:wirelessPaymentInfo(w)}));
+  const due=infos.reduce((s,x)=>s+Number(x.i.amount||0),0),collected=infos.reduce((s,x)=>s+Number(x.i.paid||0),0),outstanding=infos.reduce((s,x)=>s+Number(x.i.remaining||0),0);
+  const sizes=type==='iHome'?[140,225]:[90,325],counts={};sizes.forEach(g=>counts[g]=rows.filter(w=>Number(w.packageGb)===g).length);
+  return{type,rows,infos,due,collected,outstanding,unpaid:infos.filter(x=>x.i.remaining>0).length,sizes,counts};
+}
+function wirelessOverviewCardV26(type){const s=wirelessSummaryV26(type);return `<div class="overview-card" onclick="setWirelessTabV26('${type}')"><h3>${type==='iHome'?'🟢 iHome اتصالات':'💜 WE Air'}</h3><div class="big">${num(s.rows.length)} <small>شريحة</small></div><div class="subrow"><span>إيرادات ${money(s.due)}</span><span>متبقي ${money(s.outstanding)}</span></div></div>`}
+renderWireless=function(){
+  const s=wirelessSummaryV26(_wirelessTabV26),title=wireLabelV26(_wirelessTabV26);
+  $('#page-wireless').innerHTML=`<div class="section-title"><div><h2>الإنترنت الهوائي</h2><p>iHome وWE Air منفصلان في الإحصائيات والتحصيل</p></div><button class="btn small" onclick="openWirelessModal('',{type:'${_wirelessTabV26}'})">+ شريحة</button></div>
+  <div class="v26-wire-overview">${wirelessOverviewCardV26('iHome')}${wirelessOverviewCardV26('WE Air')}</div>
+  <div class="v26-wire-tabs"><button class="v26-wire-tab ${_wirelessTabV26==='iHome'?'active':''}" onclick="setWirelessTabV26('iHome')">iHome اتصالات</button><button class="v26-wire-tab ${_wirelessTabV26==='WE Air'?'active':''}" onclick="setWirelessTabV26('WE Air')">WE Air</button></div>
+  <div class="stats"><div class="stat interactive" onclick="openWirelessBreakdownV26('${_wirelessTabV26}')"><div class="label">إجمالي شرائح ${esc(title)}</div><div class="value">${num(s.rows.length)}</div><div class="sub">اضغط لتفاصيل السعات</div></div><div class="stat"><div class="label">إجمالي الإيرادات</div><div class="value">${money(s.due)}</div></div><div class="stat"><div class="label">المحصّل</div><div class="value good">${money(s.collected)}</div></div><div class="stat interactive" onclick="openWirelessStatV26('${_wirelessTabV26}','unpaid')"><div class="label">المتبقي</div><div class="value ${s.outstanding?'bad':'good'}">${money(s.outstanding)}</div><div class="sub">${num(s.unpaid)} لم يسددوا بالكامل</div></div></div>
+  <div style="height:12px"></div><div class="toolbar"><div class="searchbox"><input id="wireSearch" placeholder="اسم العميل أو رقم الشريحة..." oninput="refreshWirelessList()"></div></div><div id="wirelessList" class="cards-list"></div>`;refreshWirelessList();
+};
+function setWirelessTabV26(type){_wirelessTabV26=type==='WE Air'?'WE Air':'iHome';renderWireless()}
+function openWirelessBreakdownV26(type){const s=wirelessSummaryV26(type);modal(`تفاصيل ${wireLabelV26(type)}`,`<div class="v26-breakdown">${s.sizes.map(g=>`<div><span>${g}GB</span><b>${num(s.counts[g]||0)}</b><small>شريحة</small></div>`).join('')}</div><div class="v26-fin-grid"><div><span>إجمالي الإيرادات</span><b>${money(s.due)}</b></div><div><span>المحصّل</span><b class="good">${money(s.collected)}</b></div><div><span>المتبقي</span><b class="${s.outstanding?'bad':'good'}">${money(s.outstanding)}</b></div></div>`)}
+function openWirelessStatV26(type,mode='all'){let ws=activeWirelessV26().filter(w=>w.type===type);if(mode==='unpaid')ws=ws.filter(w=>wirelessPaymentInfo(w).remaining>0);modal(`${wireLabelV26(type)} — ${mode==='unpaid'?'متبقي التحصيل':'كل الشرائح'}`,`<div class="cards-list">${ws.map(w=>{const i=wirelessPaymentInfo(w);return `<div class="result-card clickable-card" onclick="showWireless('${w.id}')"><h4>${esc(w.customerName)}</h4><p>${esc(w.simNumber||'رقم الشريحة غير مسجل')} • ${num(w.packageGb)}GB • ${i.remaining?'متبقي '+money(i.remaining):'مدفوع'}</p></div>`}).join('')||'<div class="empty">لا توجد نتائج</div>'}</div>`)}
+refreshWirelessList=function(){const q=($('#wireSearch')?.value||'').toLowerCase();const ws=activeWirelessV26().filter(w=>w.type===_wirelessTabV26&&(w.customerName+' '+w.address+' '+w.phone+' '+w.simNumber+' '+w.type+' '+w.packageGb).toLowerCase().includes(q)),el=$('#wirelessList');if(!el)return;el.innerHTML=ws.length?ws.map(w=>{const i=wirelessPaymentInfo(w),l=state.lines.find(x=>x.id===w.lineId),sim=w.simNumber||'رقم الشريحة غير مسجل';return `<article class="customer-list-card clickable-card" onclick="showWireless('${w.id}')"><div class="member-head"><div><h3>${esc(w.customerName)}</h3><p>${esc(w.type)} • ${num(w.packageGb)}GB • <b class="ltr">${esc(sim)}</b></p><p>مرتبط: ${esc(l?l.owner+' ****'+String(l.number).slice(-4)+' • '+l.group:'غير مرتبط')}</p></div><span class="pill ${i.remaining?(i.status==='مدفوع جزئي'?'warn':'bad'):'good'}">${esc(i.status)}</span></div><div class="customer-quick"><span>السعر <b>${money(w.price)}</b></span><span>المحصّل <b class="good">${money(i.paid)}</b></span><span>متبقي <b class="${i.remaining?'bad':'good'}">${money(i.remaining)}</b></span></div><div class="member-actions" onclick="event.stopPropagation()"><button class="btn good small" onclick="markWirelessPaidFull('${w.id}')">✅ تم الدفع</button><button class="btn secondary small" onclick="openWirelessPaymentModal('${w.id}')">💰 دفع مبلغ</button><button class="btn renew small" onclick="recordWirelessRenewal('${w.id}')">🔄 تجديد</button><button class="btn secondary small" onclick="openWhatsAppFor('${w.phone}')">💬 واتساب</button><button class="btn secondary small" onclick="openWirelessModal('${w.id}')">✏️ تعديل</button></div></article>`}).join(''):'<div class="empty">لا توجد شرائح في هذا القسم</div>'};
+showWireless=function(id){const w=state.wireless.find(x=>x.id===id);if(!w)return;const i=wirelessPaymentInfo(w),l=state.lines.find(x=>x.id===w.lineId),sim=w.simNumber||'رقم الشريحة غير مسجل';modal(`${w.type} — ${w.customerName}`,`<div class="stats"><div class="stat interactive" onclick="openWirelessModal('${w.id}')"><div class="label">الباقة</div><div class="value">${num(w.packageGb)}GB</div></div><div class="stat"><div class="label">القيمة الشهرية</div><div class="value">${money(w.price)}</div></div><div class="stat interactive" onclick="openWirelessPaymentModal('${w.id}')"><div class="label">حالة الدفع</div><div class="value ${i.remaining?'bad':'good'}">${esc(i.status)}</div><div class="sub">متبقي ${money(i.remaining)}</div></div><div class="stat"><div class="label">التجديد مع الخط</div><div class="value detail-date">${esc(w.nextRenewal||'-')}</div><div class="sub">${esc(l?.group||'غير مرتبط')}</div></div></div><section class="info-card clickable-card" onclick="openWirelessModal('${w.id}')"><div class="info-row"><span>اسم العميل</span><b>${esc(w.customerName)}</b></div><div class="info-row"><span>رقم الشريحة</span><b class="ltr">${esc(sim)}</b></div><div class="info-row"><span>رقم التواصل</span><b class="ltr">${esc(w.phone||'-')}</b></div><div class="info-row"><span>عنوان العميل</span><b>${esc(w.address||'-')}</b></div><div class="info-row"><span>الخط الأساسي المرتبط</span><b>${esc(l?l.owner+' • ****'+String(l.number).slice(-4)+' • '+l.group:'غير مرتبط')}</b></div><div class="info-row"><span>حالة التجديد</span><b class="${w.renewalStatus==='تم التجديد'?'good':'warn'}">${esc(w.renewalStatus||'غير محدد')}</b></div><span class="open-hint">اضغط للتعديل ←</span></section>`,`<button class="btn good" onclick="openWirelessPaymentModal('${w.id}')">تسجيل دفع</button><button class="btn renew" onclick="recordWirelessRenewal('${w.id}')">🔄 تجديد</button><button class="btn secondary" onclick="openWhatsAppFor('${w.phone}')">💬 واتساب</button><button class="btn secondary" onclick="copyPhone('${w.simNumber||''}')">📋 نسخ رقم الشريحة</button><button class="btn secondary" onclick="openWirelessModal('${w.id}')">تعديل</button>${l?`<button class="btn secondary" onclick="showLine('${l.id}')">فتح الخط الأساسي</button>`:''}`)};
+
+/* replace wireless form to remove router rental field entirely */
+openWirelessModal=function(id='',prefill={}){_wirelessReturnPageV26=currentPage||'wireless';const w=id?state.wireless.find(x=>x.id===id):null;const type=w?.type||prefill?.type||'WE Air',pack=Number(w?.packageGb||prefill?.packageGb||(type==='iHome'?225:90));const key=`${type} ${pack}`,lineId=w?.lineId||prefill?.lineId||'',linkedLine=state.lines.find(x=>x.id===lineId),renewal=w?.nextRenewal||(linkedLine?nextGroupBoundary(linkedLine.group,w?.activation||todayISO()):addMonths(todayISO(),1));const body=`<div class="alert good">الشريحة ترتبط بخط أساسي واحد فقط. الراوتر لم يعد جزءًا من العهدة أو الإيجار داخل البرنامج.</div><div class="form-grid"><div class="field"><label>اسم العميل</label><input id="fWName" value="${esc(w?.customerName||'')}"></div><div class="field"><label>عنوان العميل</label><input id="fWAddress" value="${esc(w?.address||'')}" placeholder="المدينة / المنطقة / العنوان"></div><div class="field"><label>رقم التواصل — 11 رقم</label><input id="fWPhone" maxlength="11" inputmode="numeric" value="${esc(w?.phone||'')}"></div><div class="field"><label>رقم شريحة ${esc(type)} — 11 رقم</label><input id="fWSim" maxlength="11" inputmode="numeric" value="${esc(w?.simNumber||'')}"></div><div class="field"><label>نوع الشريحة</label><select id="fWType" onchange="wireTypeChangedV26('${id}')"><option ${type==='WE Air'?'selected':''}>WE Air</option><option ${type==='iHome'?'selected':''}>iHome</option></select></div><div class="field"><label>الباقة</label><select id="fWPack" onchange="wirePackChangedV26()"></select></div><div class="field"><label>القيمة الشهرية</label><input id="fWPrice" type="number" value="${esc(w?.price??state.settings.wirelessPrices[key]??'')}"></div><div class="field"><label>الخط الأساسي المرتبط</label><select id="fWLine" onchange="wireLineChanged()">${wirelessLineOptions(type,lineId,id)}</select><span class="hint">أي خط مرتبط بالفعل بشريحة أخرى لن يظهر هنا.</span></div><div class="field"><label>تاريخ البداية</label><input id="fWActivation" type="date" value="${esc(w?.activation||todayISO())}" onchange="updateWirelessRenewalFromLine()"></div><div class="field"><label>التجديد القادم — مع الخط الأساسي</label><input id="fWRenewal" type="date" value="${esc(renewal)}" readonly></div><div class="field"><label>مدفوع الآن</label><input id="fWPaid" type="number" min="0" value="${esc(w?wirelessPaymentInfo(w).paid:0)}"></div><div class="field full"><label>ملاحظات</label><textarea id="fWNotes">${esc(w?.notes||'')}</textarea></div></div>`;window._editingWirelessId=id||'';modal(w?'تعديل الشريحة':'إضافة شريحة',body,`<button class="btn" onclick="saveWirelessV26('${id}')">حفظ</button>`);wirePopulatePacksV26(pack);setTimeout(()=>{validateWirelessPackForLine();updateWirelessRenewalFromLine(false)},0)};
+function wirelessPackValuesV26(type){const prefix=type+' ';const vals=Object.keys(state.settings.wirelessPrices||{}).filter(k=>k.startsWith(prefix)).map(k=>Number(k.slice(prefix.length))).filter(n=>n>0);const defaults=type==='iHome'?[140,225]:[90,325];return [...new Set([...defaults,...vals])].sort((a,b)=>a-b)}
+function wirePopulatePacksV26(sel=''){const type=$('#fWType')?.value||'WE Air',vals=wirelessPackValuesV26(type),s=$('#fWPack');if(s)s.innerHTML=vals.map(v=>`<option ${String(v)===String(sel)?'selected':''} value="${v}">${v} جيجا</option>`).join('')}
+function wireTypeChangedV26(id=''){wirePopulatePacksV26();const current=state.wireless.find(x=>x.id===id)?.lineId||'';$('#fWLine').innerHTML=wirelessLineOptions($('#fWType').value,current,id);wirePackChangedV26();wireLineChanged()}
+function wirePackChangedV26(){const key=$('#fWType').value+' '+$('#fWPack').value;$('#fWPrice').value=state.settings.wirelessPrices[key]??'';validateWirelessPackForLine()}
+function saveWirelessV26(id=''){const name=$('#fWName').value.trim(),address=$('#fWAddress').value.trim(),phone=arToEnDigits($('#fWPhone').value.trim()),sim=arToEnDigits($('#fWSim').value.trim()),type=$('#fWType').value,packageGb=Number($('#fWPack').value),price=Number($('#fWPrice').value||0),paid=Number($('#fWPaid').value||0),lineId=$('#fWLine').value;if(!name)return alert('اكتب اسم العميل');if(!phoneOk(phone))return alert('رقم التواصل لازم يكون 11 رقم');if(!phoneOk(sim))return alert('رقم الشريحة لازم يكون 11 رقم بالضبط');const dup=state.wireless.find(w=>w.active!==false&&w.simNumber===sim&&w.id!==id);if(dup)return alert('رقم الشريحة مرتبط بالفعل بعميل آخر');if(!lineId)return alert('اختار الخط الأساسي المرتبط بالشريحة');const already=linkedWirelessForLine(lineId,id);if(already)return alert('الخط الأساسي مرتبط بالفعل بشريحة '+already.type+' للعميل '+already.customerName);const l=state.lines.find(x=>x.id===lineId);if(type==='iHome'&&l?.network!=='اتصالات')return alert('iHome يجب أن يرتبط بخط اتصالات');if(type==='WE Air'&&l?.network!=='WE')return alert('WE Air يجب أن يرتبط بخط WE');if(type==='iHome'&&Number(l?.capacityGb)<=70&&packageGb===225)return alert('خط اتصالات 70GB يسمح بـ iHome 140GB فقط');const activation=$('#fWActivation').value||todayISO(),nextRenewal=nextGroupBoundary(l.group,activation);commit(id?'تعديل شريحة '+name:'إضافة شريحة '+name,()=>{let w=id?state.wireless.find(x=>x.id===id):null;if(!w){w={id:uid('w'),active:true,renewalStatus:'غير محدد'};state.wireless.push(w)}Object.assign(w,{customerName:name,address,phone,simNumber:sim,type,packageGb,price,lineId,activation,nextRenewal,paid,notes:$('#fWNotes').value});let p=currentWirelessPayment(w);if(!p){p={id:uid('wpay'),wirelessId:w.id,dueDate:activation,amount:price,paid,status:statusOf(price,paid),paidDate:paid>=price&&price>0?todayISO():''};state.wirelessPayments.push(p)}else{p.amount=price;p.paid=paid;p.status=statusOf(price,paid);if(p.status==='مدفوع')p.paidDate=todayISO()}});_wirelessTabV26=type;const backPage=_wirelessReturnPageV26||currentPage||'wireless';showPage(backPage);if(backPage==='wireless')renderWireless();toast('تم حفظ الشريحة')}
+Object.assign(window,{setWirelessTabV26,openWirelessBreakdownV26,openWirelessStatV26,wireTypeChangedV26,wirePackChangedV26,saveWirelessV26});
+
+/* ===== smart best-placement search ===== */
+function lineCandidateV26(l,gb,price){const m=lineMetrics(l),f=lineFinancials(l);if(m.vacancies<=0||m.remaining<gb)return null;const currentSales=Number(f.totalDue||0),cost=Number(l.cost||0),afterSales=currentSales+Number(price||0),currentGap=Math.max(0,cost-currentSales),afterGap=Math.max(0,cost-afterSales),afterProfit=afterSales-cost,remainingAfter=m.remaining-gb,vacAfter=m.vacancies-1,coverageGain=currentGap-afterGap;let score=0;score+=coverageGain*1000;if(afterGap===0&&currentGap>0)score+=250000;score+=Math.min(currentGap,Number(price||0))*300;score-=Math.max(0,remainingAfter)*3;score-=Math.max(0,remainingAfter)*Math.max(0,1-vacAfter)*2;if(vacAfter===0&&remainingAfter>20)score-=6000;return{l,m,f,currentSales,cost,afterSales,currentGap,afterGap,afterProfit,remainingAfter,vacAfter,coverageGain,score}}
+function rankLinesForPackageV26(network,group,gb,price){return state.lines.filter(l=>l.active&&l.network===network&&l.group===group).map(l=>lineCandidateV26(l,Number(gb),Number(price))).filter(Boolean).sort((a,b)=>b.score-a.score||a.remainingAfter-b.remainingAfter||b.afterProfit-a.afterProfit)}
+function bestFitCardHtmlV26(x,index,gb,price){const reason=x.currentGap>0?(x.afterGap===0?`الباقة تغطي الجزء المتبقي من فاتورة الخط وتحوّله إلى ${x.afterProfit>=0?'ربح':'أقرب للتعادل'}.`:`تقلل المبلغ المطلوب لتغطية الفاتورة من ${money(x.currentGap)} إلى ${money(x.afterGap)}.`):`الخط مغطّي فاتورته بالفعل، وهذا الاختيار يحافظ على توزيع المساحات المتاحة قدر الإمكان.`;return `<article class="best-fit-card-v26 ${index===0?'best':''}"><div class="best-fit-head-v26"><div><div class="type">${index===0?'🥇 الأنسب':'خيار '+(index+1)}</div><h4>${esc(x.l.owner)} • ****${esc(String(x.l.number).slice(-4))}</h4><small>${esc(x.l.group)}</small></div><div class="v26-dual-heroes"><div class="gb-hero-v26"><small>بعد إضافة ${num(gb)}GB</small><strong>${num(x.remainingAfter)}</strong><em>GB متبقي</em></div><div class="vacancy-hero-v26 ${x.vacAfter>=2?'good':x.vacAfter===1?'warn':'bad'}"><small>الأماكن بعد الإضافة</small><strong>${num(x.vacAfter)}</strong><em>مكان</em></div></div></div><p class="best-fit-reason-v26">${reason}</p><div class="best-fit-money-v26"><span>مبيعات الآن<b>${money(x.currentSales)}</b></span><span>بعد الإضافة<b>${money(x.afterSales)}</b></span><span>صافي الخط بعد الإضافة<b class="${x.afterProfit>=0?'good':'warn'}">${profitText(x.afterProfit)}</b></span></div><div class="actions" style="margin-top:9px"><button class="btn secondary small" onclick="showLine('${x.l.id}')">فتح الخط</button></div></article>`}
+function bestFitGroupOptionsV26(net,selected=''){return (GROUPS[net]||[]).map(g=>`<option value="${esc(g)}" ${g===selected?'selected':''}>${esc(g)}</option>`).join('')}
+function openBestFitSearchV26(pref={}){const net=pref.network||'اتصالات',group=pref.group||targetGroupForV25(net,new Date()),gb=Number(pref.gb||20),p=quickPriceFor(net,gb);modal('🔎 فين أحط الباقة؟',`<div class="alert good">بحث للاستعلام فقط. يراجع الخطوط الحالية في نفس الشبكة ودورة التجديد ويقترح الأنسب من ناحية تغطية الفاتورة والربحية واستغلال الأماكن.</div><div class="form-grid"><div class="field"><label>الشبكة</label><select id="bestNetV26" onchange="bestNetChangedV26()"><option ${net==='اتصالات'?'selected':''}>اتصالات</option><option ${net==='WE'?'selected':''}>WE</option></select></div><div class="field"><label>دورة التجديد</label><select id="bestGroupV26">${bestFitGroupOptionsV26(net,group)}</select></div><div class="field"><label>الباقة المطلوبة</label><input id="bestGbV26" type="number" min="1" value="${gb}" oninput="bestGbChangedV26()"></div><div class="field"><label>سعر البيع</label><input id="bestPriceV26" type="number" min="0" value="${p??''}"><span id="bestPriceHintV26" class="hint">${p==null?'الباقة غير مسعرة — اكتب السعر للاستعلام.':'تم جلب السعر من جدول الأسعار.'}</span></div></div><button class="btn" style="margin-top:10px" onclick="runBestFitSearchV26()">عرض أنسب الخطوط</button><div id="bestFitResultsV26" style="margin-top:12px"></div>`);setTimeout(()=>runBestFitSearchV26(),20)}
+function bestNetChangedV26(){const net=$('#bestNetV26').value;$('#bestGroupV26').innerHTML=bestFitGroupOptionsV26(net,targetGroupForV25(net,new Date()));bestGbChangedV26()}
+function bestGbChangedV26(){const net=$('#bestNetV26')?.value||'اتصالات',gb=Number($('#bestGbV26')?.value||0),p=quickPriceFor(net,gb),inp=$('#bestPriceV26'),hint=$('#bestPriceHintV26');if(p!==null&&inp)inp.value=p;if(hint)hint.textContent=p!==null?'تم جلب السعر من جدول الأسعار.':'الباقة غير مسعرة — اكتب السعر للاستعلام.'}
+function runBestFitSearchV26(){const net=$('#bestNetV26')?.value||'اتصالات',group=$('#bestGroupV26')?.value||targetGroupForV25(net),gb=Number($('#bestGbV26')?.value||0),price=Number($('#bestPriceV26')?.value||0),box=$('#bestFitResultsV26');if(!box)return;if(!(gb>0))return box.innerHTML='<div class="alert bad">اكتب عدد الجيجات المطلوبة.</div>';const rows=rankLinesForPackageV26(net,group,gb,price);box.innerHTML=`<div class="v26-smart-result-title"><h4>النتائج — ${esc(group)}</h4><span class="pill">${num(rows.length)} خط مناسب</span></div>${rows.slice(0,5).map((x,i)=>bestFitCardHtmlV26(x,i,gb,price)).join('')||'<div class="alert warn">لا يوجد خط حالي فيه مكان وسعة كافيان لهذه الباقة في الدورة المختارة. يمكنك فتح التحليل الذكي لمعرفة توزيع الحجوزات أو الحاجة لخط جديد.</div>'}`}
+function showReservationPlacementSuggestionV26(id){const r=state.reservations.find(x=>x.id===id&&rActiveV26(x));if(!r)return openReservations();const group=r.targetGroup||targetGroupForV25(r.network,r.createdAt||new Date()),gb=Number(r.package||0),price=Number(r.amount||0),rows=rankLinesForPackageV26(r.network,group,gb,price);modal(`💡 أنسب مكان للحجز — ${gb}GB`,`<div class="alert good">${esc(r.name||r.phone)} • ${esc(r.network)} • ${esc(group)}<br>تم تحليل الخطوط الحالية فقط في نفس الشبكة والدورة.</div>${rows.slice(0,5).map((x,i)=>bestFitCardHtmlV26(x,i,gb,price)).join('')||'<div class="alert warn">لا يوجد مكان مناسب حاليًا على الخطوط الموجودة لهذه الدورة.</div>'}`,`<button class="btn secondary" onclick="openReservations()">رجوع للحجوزات</button><button class="btn" onclick="openSmartAnalysisV26('${r.network}','${group}')">تحليل كل الحجوزات</button>`)}
+function rActiveV26(r){return r&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي'}
+Object.assign(window,{openBestFitSearchV26,bestNetChangedV26,bestGbChangedV26,runBestFitSearchV26,showReservationPlacementSuggestionV26});
+
+/* beam-search assignment across existing lines so multiple reservations are considered together */
+function reservationItemsV26(network,group){return activeReservationsV26().filter(r=>r.network===network&&(r.targetGroup||targetGroupForV25(r.network,r.createdAt||new Date()))===group).map(r=>({id:r.id,name:r.name||r.phone,phone:r.phone,gb:Number(r.package||0),amount:Number(r.amount||0),minutes:Number(r.minutes||defaultMemberMinutesV26(r.package)),r})).filter(x=>x.gb>0).sort((a,b)=>b.gb-a.gb||b.amount-a.amount)}
+function existingLineStatesV26(network,group){return state.lines.filter(l=>l.active&&l.network===network&&l.group===group).map(l=>{const m=lineMetrics(l),f=lineFinancials(l);return{line:l,remainingGb:Math.max(0,Number(m.remaining||0)),slots:Math.max(0,Number(m.vacancies||0)),baseSales:Number(f.totalDue||0),cost:Number(l.cost||0),assigned:[]}}).filter(x=>x.remainingGb>0&&x.slots>0)}
+function assignmentScoreV26(lines){let score=0,placed=0,gb=0;for(const ln of lines){const add=ln.assigned.reduce((s,x)=>s+x.amount,0),ag=ln.assigned.reduce((s,x)=>s+x.gb,0);placed+=ln.assigned.length;gb+=ag;const beforeGap=Math.max(0,ln.cost-ln.baseSales),afterGap=Math.max(0,ln.cost-(ln.baseSales+add));score+=(beforeGap-afterGap)*1200;if(beforeGap>0&&afterGap===0)score+=200000;score-=ln.remainingGb*2;if(ln.slots===0&&ln.remainingGb>20)score-=4000}return score+placed*1000000+gb*30}
+function beamAssignExistingV26(items,baseLines,width=500){let states=[{lines:baseLines.map(x=>({...x,assigned:[]})),left:[]}];for(const it of items){const next=[];for(const st of states){next.push({lines:st.lines.map(x=>({...x,assigned:x.assigned.slice()})),left:st.left.concat(it)});for(let i=0;i<st.lines.length;i++){const ln=st.lines[i];if(ln.slots<=0||ln.remainingGb<it.gb)continue;const lines=st.lines.map(x=>({...x,assigned:x.assigned.slice()}));lines[i].assigned.push(it);lines[i].remainingGb-=it.gb;lines[i].slots--;next.push({lines,left:st.left.slice()})}}const seen=new Map();for(const st of next){const sig=st.lines.map(l=>`${l.remainingGb}:${l.slots}:${l.assigned.map(a=>a.id).sort().join(',')}`).join('|')+'#'+st.left.map(x=>x.id).sort().join(',');const sc=assignmentScoreV26(st.lines)-st.left.length*100;const old=seen.get(sig);if(!old||sc>old.sc)seen.set(sig,{st,sc})}states=[...seen.values()].sort((a,b)=>b.sc-a.sc).slice(0,width).map(x=>x.st)}states.sort((a,b)=>assignmentScoreV26(b.lines)-assignmentScoreV26(a.lines)||a.left.length-b.left.length);return states[0]||{lines:baseLines,left:items.slice()}}
+function newLineSpecV26(network){return{capacity:Number(state.settings.smartDefaultCapacity?.[network]||200),members:Number(state.settings.smartDefaultMembers?.[network]||(network==='WE'?6:7)),cost:Number(state.settings.smartDefaultCost?.[network]||(network==='WE'?1700:2200))}}
+function packNewLinesV26(items,spec){const bins=[];const sorted=items.slice().sort((a,b)=>b.amount/Math.max(1,b.gb)-a.amount/Math.max(1,a.gb)||b.gb-a.gb);for(const it of sorted){let best=bins.filter(b=>b.remainingGb>=it.gb&&b.slots>0).sort((a,b)=>(a.remainingGb-it.gb)-(b.remainingGb-it.gb)||a.slots-b.slots)[0];if(!best){best={kind:'new',index:bins.length+1,remainingGb:spec.capacity,slots:spec.members,baseSales:0,cost:spec.cost,assigned:[],capacity:spec.capacity,maxMembers:spec.members};bins.push(best)}best.assigned.push(it);best.remainingGb-=it.gb;best.slots--}return bins}
+function smartPlanV26(network,group){const items=reservationItemsV26(network,group),base=existingLineStatesV26(network,group),assigned=beamAssignExistingV26(items,base),placements=assigned.lines.filter(x=>x.assigned.length).map(x=>({kind:'existing',line:x.line,remainingGb:x.remainingGb,slots:x.slots,baseSales:x.baseSales,cost:x.cost,assigned:x.assigned,capacity:Number(x.line.capacityGb||0),maxMembers:Number(x.line.maxMembers||0)})),spec=newLineSpecV26(network),newBins=packNewLinesV26(assigned.left,spec);return{network,group,items,placements:placements.concat(newBins),spec}}
+function smartPlanCardV26(p){const added=p.assigned.reduce((s,x)=>s+x.amount,0),gb=p.assigned.reduce((s,x)=>s+x.gb,0),finalSales=Number(p.baseSales||0)+added,profit=finalSales-Number(p.cost||0),title=p.kind==='existing'?`${p.line.owner} • ****${String(p.line.number).slice(-4)}`:`خط جديد ${p.capacity||200}GB`,need=Math.max(0,Number(p.cost||0)-finalSales);return `<article class="smart-plan-card ${profit>=0?'covered':'needs'}"><div class="smart-plan-head"><div><h4>${esc(title)}</h4><small>${p.kind==='existing'?'خط قائم — أولوية':'مقترح فتح خط'}</small></div><span class="pill ${profit>=0?'good':'warn'}">${profit>=0?'الفاتورة مغطاة':'لم يغطِّ الفاتورة بعد'}</span></div><p class="smart-packages">${esc(p.assigned.map(x=>`${x.gb}GB — ${x.name}`).join(' + '))}</p><div class="v26-dual-heroes"><div class="gb-hero-v26"><small>المتبقي بعد التوزيع</small><strong>${num(p.remainingGb)}</strong><em>GB</em></div><div class="vacancy-hero-v26 ${p.slots>=2?'good':p.slots===1?'warn':'bad'}"><small>الأماكن الفارغة</small><strong>${num(p.slots)}</strong><em>مكان</em></div></div><div class="smart-numbers"><span>جيجات الحجوزات <b>${num(gb)}GB</b></span><span>مبيعات مضافة <b>${money(added)}</b></span><span>إجمالي مبيعات الخط <b>${money(finalSales)}</b></span><span>فاتورة الخط <b>${money(p.cost)}</b></span></div><div class="smart-result ${profit>=0?'good':'warn'}">${profit>=0?`ربح متوقع ${money(profit)} — والمتبقي ${num(p.remainingGb)}GB مخزون للبيع الإضافي`:`متبقي ${money(need)} لتغطية الفاتورة — ويمكن استكماله من الحجوزات أو بيع الجيجات الإضافية`}</div></article>`}
+function openSmartAnalysisV26(network,group=''){group=group||targetGroupForV25(network,new Date());const plan=smartPlanV26(network,group),totalGb=plan.items.reduce((s,x)=>s+x.gb,0),totalSales=plan.items.reduce((s,x)=>s+x.amount,0),existing=plan.placements.filter(x=>x.kind==='existing').length,newLines=plan.placements.filter(x=>x.kind==='new').length;modal(`🧠 تحليل ${network} — ${group}`,`<div class="alert good"><b>تحليل ${network} مستقل لدورة ${esc(group)} فقط.</b><br>تمت مقارنة الحجوزات مع الأماكن الفارغة في الخطوط الحالية كمجموعة واحدة قبل اقتراح أي خط جديد.</div><div class="smart-summary"><div><span>الحجوزات</span><b>${num(plan.items.length)}</b></div><div><span>إجمالي الجيجات</span><b>${num(totalGb)}GB</b></div><div><span>مبيعات متوقعة</span><b>${money(totalSales)}</b></div><div><span>خطوط حالية مستخدمة</span><b>${num(existing)}</b></div><div><span>خطوط جديدة مقترحة</span><b>${num(newLines)}</b></div></div>${network==='اتصالات'?'<div class="alert warn">اتصالات: الخط الجديد المقترح 200GB فقط. لا يتم اقتراح فتح خط 70GB.</div>':'<div class="alert warn">WE: الجيجات المرحلة في الخطوط الحالية تدخل ضمن السعة المتاحة للتوزيع.</div>'}<div class="cards-list smart-plan-list">${plan.placements.map(smartPlanCardV26).join('')||'<div class="empty">لا توجد حجوزات لهذه الشبكة والدورة حاليًا.</div>'}</div><div class="alert good">الدقائق لا تدخل في هذا التحليل؛ هي للمتابعة فقط. ليس مطلوبًا بيع السعة كاملة إذا كانت التركيبة الحالية قد غطت الفاتورة وحققت ربحًا.</div>`,`<button class="btn secondary" onclick="openReservations()">رجوع للحجوزات</button><button class="btn secondary" onclick="openBestFitSearchV26({network:'${network}',group:'${group}',gb:20})">🔎 فين أحط باقة؟</button>`)}
+window.openSmartAnalysisV26=openSmartAnalysisV26;window.openSmartAnalysisV25=function(network){return openSmartAnalysisV26(network,targetGroupForV25(network,new Date()))};
+
+/* ===== vacancy box in group suitable-lines lists ===== */
+openGroupMetric=function(group,mode='all'){let ls=state.lines.filter(l=>l.active&&l.group===group);if(mode==='withGb')ls=ls.filter(l=>lineMetrics(l).remaining>0);if(mode==='open')ls=ls.filter(l=>{const m=lineMetrics(l);return m.remaining>0&&m.vacancies>0});if(mode==='fullGb')ls=ls.filter(l=>{const m=lineMetrics(l);return m.remaining>0&&m.vacancies===0});if(mode==='over')ls=ls.filter(l=>lineMetrics(l).remaining<0);if(mode==='outstanding')ls=ls.filter(l=>lineFinancials(l).totalOutstanding>0);const title={all:'كل الخطوط',withGb:'الخطوط التي بها جيجات متاحة',open:'الخطوط التي يمكن إضافة أفراد عليها',fullGb:'جيجات متاحة لكن الأماكن مكتملة',over:'خطوط متجاوزة السعة',outstanding:'خطوط عليها مبالغ متبقية'}[mode]||'تفاصيل';modal(`${group} — ${title}`,`<div class="cards-list">${ls.map(l=>{const m=lineMetrics(l),f=lineFinancials(l);return `<div class="result-card clickable-card" onclick="showLine('${l.id}')"><div class="best-fit-head-v26"><div><h4>${esc(l.owner)} • ****${esc(String(l.number).slice(-4))}</h4><p>فاتورة ${money(f.invoice)} • مبيعات ${money(f.totalDue)} • ${profitText(f.netProfit)}</p></div><div class="v26-dual-heroes"><div class="gb-hero-v26"><small>متبقي</small><strong>${num(m.remaining)}</strong><em>GB</em></div><div class="vacancy-hero-v26 ${m.vacancies>=2?'good':m.vacancies===1?'warn':'bad'}"><small>الأماكن الفارغة</small><strong>${num(m.vacancies)}</strong><em>مكان</em></div></div></div><span class="open-hint">اضغط لفتح الخط كامل ←</span></div>`}).join('')||'<div class="empty">لا توجد نتائج</div>'}</div>`)};
+
+/* ===== navigation: keep user on the previous screen after actions ===== */
+const _showPageV26Base=showPage;
+showPage=function(page,rer=true){if(!_goingBackV26&&currentPage&&page!==currentPage&&page!=='customer-detail')_pageHistoryV26.push(currentPage);const r=_showPageV26Base.apply(this,arguments);return r};
+function goBackV26(){if($('#modalRoot')?.innerHTML?.trim()){closeModal();return}const p=_pageHistoryV26.pop();if(p){_goingBackV26=true;_showPageV26Base(p);_goingBackV26=false}else _showPageV26Base('dashboard')}
+window.goBackV26=goBackV26;
+const _backCustomerV26Base=typeof backFromCustomerDetails==='function'?backFromCustomerDetails:null;
+if(_backCustomerV26Base)backFromCustomerDetails=function(){const p=customerDetailReturnPage&&customerDetailReturnPage!=='customer-detail'?customerDetailReturnPage:_pageHistoryV26.pop()||'customers';currentCustomerId='';_goingBackV26=true;_showPageV26Base(p);_goingBackV26=false};
+
+/* ===== remove router rental traces from visible archive/more UI, keep old data in backup ===== */
+if(typeof window.openArchiveV24==='function'){
+  const _openArchiveV26Base=window.openArchiveV24;window.openArchiveV24=function(type='all'){if(type==='routers')type='all';const r=_openArchiveV26Base(type);setTimeout(()=>{const root=$('#modalRoot');if(!root)return;$$('#modalRoot .archive-chip').filter(x=>x.textContent.includes('راوتر')).forEach(x=>x.remove());$$('#modalRoot .archive-card').filter(x=>x.textContent.includes('📶')).forEach(x=>x.remove());const nonRouter=(state.customers||[]).filter(c=>c.active===false).length+(state.reservations||[]).filter(x=>x.active===false).length+(state.wireless||[]).filter(x=>x.active===false).length+(state.lines||[]).filter(x=>x.active===false).length;const allChip=$$('#modalRoot .archive-chip').find(x=>x.textContent.includes('الكل'));const b=allChip?.querySelector('b');if(b)b.textContent=num(nonRouter)},0);return r};
+}
+const _renderMoreV26Base=renderMore;
+renderMore=function(){_renderMoreV26Base();const page=$('#page-more');if(!page)return;const arc=(state.customers||[]).filter(c=>c.active===false).length+(state.reservations||[]).filter(r=>r.active===false).length+(state.wireless||[]).filter(w=>w.active===false).length+(state.lines||[]).filter(l=>l.active===false).length;for(const card of page.querySelectorAll('.setting-card')){const h=card.querySelector('h3');if(h?.textContent.includes('الأرشيف')){h.textContent=`🗃️ الأرشيف (${arc})`;const p=card.querySelector('p');if(p)p.textContent='الأعضاء والحجوزات وAir/iHome والخطوط المؤرشفة مع إمكانية الاسترجاع.'}}
+  const grid=page.querySelector('.settings-grid');if(grid&&!grid.querySelector('.v26-best-fit-setting'))grid.insertAdjacentHTML('beforeend',`<div class="setting-card v26-best-fit-setting"><h3>🔎 فين أحط الباقة؟</h3><p class="muted">اختار الشبكة والدورة والجيجات، وشوف أنسب خط حالي من ناحية الربحية والمساحة.</p><button class="btn secondary" onclick="openBestFitSearchV26()">فتح البحث</button></div>`);
+  stampBrandV26();
+};
+
+/* dashboard: quick access to best-fit search */
+const _renderDashboardV26Base=renderDashboard;
+renderDashboard=function(){_renderDashboardV26Base();const hero=$('#page-dashboard .reservation-hero');if(hero&&!hero.querySelector('.best-fit-home-v26'))hero.insertAdjacentHTML('beforeend','<button class="btn secondary best-fit-home-v26" onclick="openBestFitSearchV26()">🔎 فين أحط الباقة؟</button>');stampBrandV26()};
+
+/* clean language + brand badge */
+function stampBrandV26(){document.title='مدير الخطوط الجديد V2.6';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('.v24-version,.v26-version,#v24Badge,#v25Badge,#v26Badge').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v26Badge" class="v26-version">V2.6</span>')}}
+function languageCleanupV26(){for(const el of document.querySelectorAll('.label,.muted,.hint,.section-title p')){if(el.childElementCount)continue;const t=el.textContent.trim();if(t==='لسه مدفع')el.textContent='لسه مدفعش'}}
+
+window.unpricedDecisionV26=unpricedDecisionV26;
+window.defaultMemberMinutesV26=defaultMemberMinutesV26;
+
+ensureV26Data();
+stampBrandV26();
+renderAll();
+languageCleanupV26();
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+console.info('Manager Lines V2.6 active');
+})();
+</script>
+
+<script id="v26PostFix">
+(function(){
+'use strict';
+if(typeof window.openRestoreWirelessV24==='function'){
+  const base=window.openRestoreWirelessV24;
+  window.openRestoreWirelessV24=function(id){const r=base(id);setTimeout(()=>{const el=document.querySelector('#restoreWirelessRouter');if(el)el.closest('.field')?.remove()},0);return r};
+}
+if(typeof saveQuickSingleV2==='function'){
+  const base=saveQuickSingleV2;
+  saveQuickSingleV2=function(again=true){
+    const lid=(typeof _quickLineV2Id!=='undefined'?_quickLineV2Id:'')||state.settings?.lastCustomerLineId||'';
+    const l=state.lines.find(x=>x.id===lid)||state.lines.find(x=>x.active&&x.id===($('#qsLine')?.value||''));
+    const gb=Number(arToEnDigits($('#qsGb')?.value||0)),type=$('#qsCustType')?.value||'customer',priceInput=$('#qsPrice'),price=Number(priceInput?.value||0),before=new Set(state.customers.map(c=>c.id));
+    if(l&&gb>0){const d=window.unpricedDecisionV26(l.network,gb,type,price);if(!d.ok)return;if(priceInput&&d.price!==price)priceInput.value=d.price}
+    const r=base.apply(this,arguments);
+    for(const c of state.customers.filter(c=>!before.has(c.id)))c.minutes=window.defaultMemberMinutesV26(c.gb);
+    storageSet(STORAGE_KEY,JSON.stringify(state));
+    return r;
+  };
+}
+})();
+</script>
+
 </body></html>
