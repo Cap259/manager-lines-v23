@@ -2743,4 +2743,189 @@ console.info('Manager Lines V2.7 active');
 })();
 
 </script>
+<script id="familyLinesV28Patch">
+/* FAMILY_LINES_PATCH_V28 — reservation transfer cleanup + duplicate edit fix + WhatsApp exact number */
+(function(){
+'use strict';
+const V28='2.8';
+let _pendingReservationToLineV28=null;
+function cycleDueV28(group,at=todayISO()){
+  const base=parseDate(String(at).slice(0,10))||new Date(),day=groupDay(group);let y=base.getFullYear(),m=base.getMonth();if(base.getDate()<day)m--;const last=new Date(y,m+1,0).getDate();return [y,String(m+1).padStart(2,'0'),String(Math.min(day,last)).padStart(2,'0')].join('-');
+}
+
+function activeReservationByPhoneV28(phone,excludeId=''){
+  phone=arToEnDigits(String(phone||'')).trim();
+  return (state.reservations||[]).find(r=>r.id!==excludeId&&r.phone===phone&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي')||null;
+}
+function fulfilledReservationV28(r){
+  if(!r)return false;
+  if(r.status!=='تم التفعيل'&&!r.activatedCustomerId)return false;
+  return !!(state.customers||[]).find(c=>c.id===r.activatedCustomerId||c.id===r.sourceCustomerId||(c.active!==false&&c.phone===r.phone));
+}
+function cleanupFulfilledReservationsV28(){
+  const before=(state.reservations||[]).length;
+  state.reservations=(state.reservations||[]).filter(r=>!fulfilledReservationV28(r));
+  return before-state.reservations.length;
+}
+
+/* Public duplicate helper ignores inactive/fulfilled reservation records.
+   The final save wrapper below also shields edits from legacy reservation records captured by older closures. */
+window.findNumberConflictV28=function(phone,opt={}){
+  phone=arToEnDigits(String(phone||'')).trim();if(!phoneOk(phone))return null;
+  const c=(state.customers||[]).find(x=>x.phone===phone&&x.id!==opt.excludeCustomerId);
+  if(c){const l=customerLine(c);return{kind:'عميل',archived:c.active===false,name:customerDisplayName(c),where:l?.group||'بدون خط',id:c.id}}
+  const r=(state.reservations||[]).find(x=>x.phone===phone&&x.id!==opt.excludeReservationId&&x.active!==false&&x.status!=='ملغي'&&x.status!=='تم التفعيل');
+  if(r)return{kind:'حجز',archived:false,name:r.name||'بدون اسم',where:r.targetGroup||r.network||'',id:r.id};
+  return null;
+};
+
+/* WhatsApp: use the number exactly as stored. No country-code conversion. */
+window.openWhatsAppFor=function(p,msg=''){
+  const raw=arToEnDigits(String(p||'')).trim();
+  if(!phoneOk(raw))return toast('رقم واتساب غير صحيح');
+  const url='https://wa.me/'+raw+(msg?'?text='+encodeURIComponent(msg):'');
+  window.open(url,'_blank');
+};
+
+function customerFormDraftV28(){
+  const lineId=$('#fCustLine')?.value||'';
+  const l=(state.lines||[]).find(x=>x.id===lineId);
+  return{
+    lineId,
+    name:($('#fCustName')?.value||'').trim(),
+    phone:arToEnDigits($('#fCustPhone')?.value||''),
+    whatsapp:arToEnDigits($('#fCustWA')?.value||''),
+    gb:Number(arToEnDigits($('#fCustGb')?.value||0)),
+    price:Number($('#fCustPrice')?.value||0),
+    paid:Number($('#fCustPaid')?.value||0),
+    activation:$('#fCustActivation')?.value||todayISO(),
+    regularity:$('#fCustRegular')?.value||'غير محدد',
+    source:($('#fCustSource')?.value||'غير محدد').trim()||'غير محدد',
+    notes:$('#fCustNotes')?.value||'',
+    customerType:$('#fCustType')?.value||'customer',
+    minutes:Number($('#fCustMinutes')?.value||(typeof window.defaultMemberMinutesV26==='function'?window.defaultMemberMinutesV26($('#fCustGb')?.value||0):0)),
+    network:l?.network||$('#fCustNet')?.value||'',
+    group:l?.group||$('#fCustGroup')?.value||''
+  };
+}
+function reservationDecisionHtmlV28(r,d,l){
+  const target=r.targetGroup||(typeof targetLabelV25==='function'?targetLabelV25(r):r.network||'');
+  return `<div class="alert warn"><b>⚠️ الرقم ${esc(r.phone)} موجود بالفعل في الحجز</b></div>
+  <div class="info-card">
+    <div class="info-row"><span>الاسم</span><b>${esc(r.name||'بدون اسم')}</b></div>
+    <div class="info-row"><span>الحجز</span><b>${esc(target)}</b></div>
+    <div class="info-row"><span>الباقة</span><b>${num(Number(r.package||0))}GB</b></div>
+    <div class="info-row"><span>السعر</span><b>${money(Number(r.amount||0))}</b></div>
+    <div class="info-row"><span>الخط الحالي</span><b>${l?esc(l.owner+' • '+l.number+' • '+l.group):'غير محدد'}</b></div>
+  </div>
+  <div class="alert good">يمكنك نقل الحجز مباشرة إلى الخط الحالي. عند النقل سيتم حذف سجل الحجز نهائيًا ويصبح الرقم عميلًا عاديًا كامل الصلاحيات.</div>`;
+}
+function showReservationToLineDecisionV28(r,d){
+  const l=(state.lines||[]).find(x=>x.id===d.lineId&&x.active);
+  if(!l)return alert('اختار الخط الأساسي أولًا');
+  _pendingReservationToLineV28={reservationId:r.id,draft:d,lineId:l.id};
+  modal('الرقم موجود في الحجز',reservationDecisionHtmlV28(r,d,l),
+    `<button class="btn good" onclick="transferReservationToCurrentLineV28()">✅ نقل من الحجز إلى الخط الحالي</button>
+     <button class="btn secondary" onclick="editReservationFromDecisionV28('${r.id}')">✏️ تعديل الحجز</button>
+     <button class="btn secondary" onclick="closeModal()">إلغاء</button>`);
+}
+function editReservationFromDecisionV28(id){
+  _pendingReservationToLineV28=null;closeModal();
+  if(typeof openReservationModal==='function')openReservationModal(id);else if(window.openReservationModal)window.openReservationModal(id);
+}
+function transferReservationToCurrentLineV28(){
+  const p=_pendingReservationToLineV28;if(!p)return;
+  const r=(state.reservations||[]).find(x=>x.id===p.reservationId&&x.active!==false&&x.status!=='تم التفعيل'&&x.status!=='ملغي');
+  const l=(state.lines||[]).find(x=>x.id===p.lineId&&x.active);if(!r||!l)return alert('الحجز أو الخط لم يعد متاحًا.');
+  if((state.customers||[]).some(c=>c.active!==false&&c.phone===r.phone))return alert('الرقم أصبح موجودًا كعميل نشط بالفعل.');
+  const d=p.draft||{},gb=Number(r.package||d.gb||0),price=Number(r.amount??d.price??0),paid=Math.min(price,Number(r.paid??d.paid??0));
+  if(!(gb>0))return alert('الحجز لا يحتوي على حجم باقة صحيح. عدّل الحجز أولًا.');
+  if(typeof window.unpricedDecisionV26==='function'){
+    const q=window.unpricedDecisionV26(l.network,gb,d.customerType||'customer',price);if(!q.ok)return;
+    if(Number(q.price)!==price)r.amount=Number(q.price||0);
+  }
+  const finalPrice=Number(r.amount??price),finalPaid=Math.min(finalPrice,paid),m=lineMetrics(l),problems=[];
+  if(m.vacancies<=0)problems.push('لا توجد أماكن فاضية');if(gb>m.remaining)problems.push(`المطلوب ${num(gb)}GB والمتاح ${num(m.remaining)}GB`);
+  if(problems.length&&!confirm('⚠️ تحذير السعة:\n'+problems.join('\n')+'\n\nهل تريد المتابعة رغم التحذير؟'))return;
+  if(r.network&&l.network&&r.network!==l.network&&!confirm(`الحجز مسجل على ${r.network} والخط الحالي ${l.network}. هل تريد النقل رغم اختلاف الشبكة؟`))return;
+  const activation=todayISO(),next=nextGroupBoundary(l.group,activation),minutes=Number(r.minutes??d.minutes??(typeof window.defaultMemberMinutesV26==='function'?window.defaultMemberMinutesV26(gb):0));
+  let newId='';
+  commit('نقل حجز '+r.phone+' إلى الخط '+l.number,()=>{
+    const c={
+      id:uid('cust'),name:r.name||d.name||'',phone:r.phone,whatsapp:r.contact||r.whatsapp||d.whatsapp||'',lineId:l.id,
+      package:String(gb),gb,price:finalPrice,paid:finalPaid,paymentStatus:statusOf(finalPrice,finalPaid),activation,
+      nextRenewal:next,renewal:next,renewals:0,regularity:d.regularity||'جديد',source:d.source||'غير محدد',
+      notes:[r.notes,d.notes,`تم النقل مباشرة من الحجز إلى الخط ${l.number}`].filter(Boolean).join('\n'),active:true,
+      renewalStatus:'تم التجديد',lastRenewedAt:activation,customerType:d.customerType||'customer',minutes,createdAt:new Date().toISOString()
+    };
+    state.customers.push(c);newId=c.id;
+    state.payments.push({id:uid('pay'),customerId:c.id,dueDate:cycleDueV28(l.group),amount:finalPrice,paid:finalPaid,status:statusOf(finalPrice,finalPaid),paidDate:finalPaid>=finalPrice&&finalPrice>0?todayISO():'',notes:'تفعيل مباشر من الحجز',createdAt:new Date().toISOString(),groupSnapshot:l.group,lineIdSnapshot:l.id,lineNumberSnapshot:l.number});
+    state.customerMoves=state.customerMoves||[];state.customerMoves.push({id:uid('mv'),customerId:c.id,fromReservationId:r.id,toLineId:l.id,toNumber:l.number,mode:'reservation-to-line',at:new Date().toISOString(),cycleDue:cycleDueV28(l.group)});
+    state.reservations=(state.reservations||[]).filter(x=>x.id!==r.id);
+    state.settings=state.settings||{};state.settings.lastCustomerLineId=l.id;
+  });
+  _pendingReservationToLineV28=null;closeModal();toast('تم نقل الحجز للخط وتحويله إلى عميل ✅');showLine(l.id);
+}
+Object.assign(window,{transferReservationToCurrentLineV28,editReservationFromDecisionV28});
+
+/* Customer save: active reservation => decision. Editing an existing customer is never blocked by legacy reservation records. */
+const _saveCustomerV28Base=saveCustomer;
+saveCustomer=function(id='',after='close'){
+  const phone=arToEnDigits($('#fCustPhone')?.value||'');
+  if(!id){
+    const activeRes=activeReservationByPhoneV28(phone);
+    if(activeRes)return showReservationToLineDecisionV28(activeRes,customerFormDraftV28());
+    return _saveCustomerV28Base.apply(this,arguments);
+  }
+  /* Older V2.5 closure checks every reservation, including fulfilled/archived ones.
+     Temporarily hide same-number reservations while editing the real customer, then restore only genuinely active reservations. */
+  const original=(state.reservations||[]).slice();
+  const activeSame=original.filter(r=>r.phone===phone&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي');
+  state.reservations=original.filter(r=>r.phone!==phone);
+  let out;
+  try{out=_saveCustomerV28Base.apply(this,arguments)}finally{
+    const current=(state.reservations||[]).filter(r=>r.phone!==phone);
+    state.reservations=current.concat(activeSame);
+    storageSet(STORAGE_KEY,JSON.stringify(state));
+  }
+  return out;
+};
+try{window.saveCustomer=saveCustomer}catch(e){}
+
+/* V27 reactivation path also removes the reservation completely after success. */
+if(typeof window.confirmReactivateReservationV27==='function'){
+  const _confirmReactivateReservationV28Base=window.confirmReactivateReservationV27;
+  window.confirmReactivateReservationV27=function(id){
+    const before=(state.reservations||[]).find(r=>r.id===id);const out=_confirmReactivateReservationV28Base.apply(this,arguments);
+    if(before){const c=(state.customers||[]).find(x=>(x.id===before.sourceCustomerId||x.phone===before.phone)&&x.active!==false);if(c){state.reservations=(state.reservations||[]).filter(r=>r.id!==id);storageSet(STORAGE_KEY,JSON.stringify(state));}}
+    return out;
+  };
+}
+
+/* Also make the standard duplicate reservation dialog useful when adding from a line. */
+function improveCustomerPhoneHintV28(){
+  const p=$('#fCustPhone'),box=$('#custPhoneAlert');if(!p||!box||window._editingCustomerId)return;
+  const phone=arToEnDigits(p.value||'');if(phone.length!==11)return;const r=activeReservationByPhoneV28(phone);if(!r)return;
+  box.innerHTML=`<div class="alert warn">📌 الرقم موجود في الحجز: <b>${esc(r.name||'بدون اسم')}</b> • ${num(Number(r.package||0))}GB. عند الحفظ سيظهر لك اختيار نقله للخط الحالي أو تعديل الحجز.</div>`;
+}
+const _custPhoneChangedV28Base=typeof custPhoneChanged==='function'?custPhoneChanged:null;
+if(_custPhoneChangedV28Base)custPhoneChanged=function(){const x=_custPhoneChangedV28Base.apply(this,arguments);setTimeout(improveCustomerPhoneHintV28,0);return x};
+
+function stampBrandV28(){
+  document.title='مدير الخطوط الجديد V2.8';
+  const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('#v24Badge,#v25Badge,#v26Badge,#v27Badge,#v28Badge,.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v28Badge" class="v26-version">V2.8</span>')}
+}
+const _renderAllV28Base=renderAll;
+renderAll=function(){const r=_renderAllV28Base.apply(this,arguments);stampBrandV28();return r};
+
+const removedV28=cleanupFulfilledReservationsV28();
+state.settings=state.settings||{};state.settings.appVersion=V28;state.schemaVersion=Math.max(Number(state.schemaVersion||1),8);
+storageSet(STORAGE_KEY,JSON.stringify(state));
+stampBrandV28();renderAll();
+if(removedV28)console.info('V2.8 removed fulfilled reservations:',removedV28);
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+console.info('Manager Lines V2.8 active');
+})();
+
+</script>
 </body></html>
