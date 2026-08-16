@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b0318" />
-<title>مدير الخطوط الجديد V2.7</title>
+<title>مدير الخطوط الجديد V2.10</title>
 
 <style>
 :root{
@@ -2928,4 +2928,416 @@ console.info('Manager Lines V2.8 active');
 })();
 
 </script>
+<script id="familyLinesV29Patch">
+/* FAMILY_LINES_PATCH_V29 — bulk reservation transfer, transfer accounting, flexible reservation search, smart return */
+(function(){
+'use strict';
+const V29='2.9';
+let _transferReturnV29=null;
+let _bulkResumeV29=null;
+
+function cycV29(group, at=todayISO()){
+  const raw=String(at||todayISO()).slice(0,10), d=parseDate(raw)||new Date(), day=groupDay(group);
+  let y=d.getFullYear(),m=d.getMonth(); if(d.getDate()<day)m--;
+  const last=new Date(y,m+1,0).getDate();
+  return [y,String(m+1).padStart(2,'0'),String(Math.min(day,last)).padStart(2,'0')].join('-');
+}
+function activeResV29(phone,exclude=''){
+  phone=arToEnDigits(String(phone||'')).trim();
+  return (state.reservations||[]).find(r=>r.id!==exclude&&r.phone===phone&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي')||null;
+}
+function lineOfV29(c){return c?(state.lines||[]).find(l=>l.id===c.lineId&&l.active):null}
+function defaultMinutesV29(gb){return typeof window.defaultMemberMinutesV26==='function'?Number(window.defaultMemberMinutesV26(gb)):Number(gb||0)>=40?2000:1500}
+function moneyStateV29(amount,paid){amount=Number(amount||0);paid=Math.min(amount,Math.max(0,Number(paid||0)));return{amount,paid,status:statusOf(amount,paid)}}
+function clearModalV29(){try{_modalReturnLineId=''}catch(e){}const root=$('#modalRoot');if(root)root.innerHTML=''}
+
+/* ---------- existing moved customers: repair legacy payment snapshot so the current line sees the sale ---------- */
+function repairMovedPaymentContextsV29(){
+  state.customerMoves=state.customerMoves||[]; let changed=0;
+  for(const c of (state.customers||[]).filter(x=>x.active)){
+    const l=lineOfV29(c); if(!l)continue;
+    const mv=state.customerMoves.filter(x=>x.customerId===c.id&&x.toLineId===l.id).slice().sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')))[0];
+    if(!mv||mv.mode==='full')continue;
+    const p=currentPayment(c); if(!p||p.dueDate!==cycV29(l.group))continue;
+    if(p.lineIdSnapshot&&p.lineIdSnapshot!==l.id){
+      p.lineIdSnapshot=l.id;p.lineNumberSnapshot=l.number;p.groupSnapshot=l.group;changed++;
+    }else if(!p.lineIdSnapshot){p.lineIdSnapshot=l.id;p.lineNumberSnapshot=l.number;p.groupSnapshot=l.group;changed++}
+  }
+  return changed;
+}
+
+/* ---------- transfer: full new package is the default, consumed GB is required ---------- */
+function transferLineOptionsV29(c,from){
+  return (state.lines||[]).filter(l=>l.active&&l.id!==from.id&&l.network===from.network&&l.group===from.group)
+    .sort((a,b)=>{const ma=lineMetrics(a),mb=lineMetrics(b);return (mb.vacancies>0?1:0)-(ma.vacancies>0?1:0)||mb.remaining-ma.remaining})
+    .map(l=>{const m=lineMetrics(l),f=lineFinancials(l);return `<option value="${l.id}">${esc(l.owner)} • ${esc(l.number)} • متبقي ${num(m.remaining)}GB • ${num(m.vacancies)} مكان • مبيعات ${money(f.totalDue)}</option>`}).join('');
+}
+function transferTotalV29(c,from){
+  if(typeof window.customerTotalAllocatedV27==='function')return Number(window.customerTotalAllocatedV27(c,from)||0);
+  const base=(c.allocationGbOverride!=null?Number(c.allocationGbOverride||0):Number(c.gb||0));
+  const extra=(state.extraGbSales||[]).filter(x=>x.active!==false&&x.gbActive!==false&&x.lineId===from.id&&x.customerId===c.id&&x.cycleDue===cycV29(from.group)).reduce((s,x)=>s+Number(x.gb||0),0);
+  return base+extra;
+}
+function openTransferModalV29(cid){
+  const c=(state.customers||[]).find(x=>x.id===cid&&x.active),from=lineOfV29(c);if(!c||!from)return;
+  const options=transferLineOptionsV29(c,from);if(!options)return alert('لا يوجد خط آخر في نفس الشبكة ونفس دورة التجديد');
+  const total=transferTotalV29(c,from),cur=paymentInfo(c);
+  _transferReturnV29={page:currentPage||'customers',customerId:cid,lineId:(typeof _customerReturnLineId!=='undefined'&&_customerReturnLineId)||from.id};
+  modal('⇄ نقل '+customerRef(c),`<div class="alert warn"><b>لازم تحدد استهلاك العميل قبل النقل.</b><br>الخط القديم سيسترجع فقط الجيجات التي لم تُستخدم. الافتراضي على الخط الجديد هو بدء باقة جديدة كاملة.</div>
+  <div class="info-card"><div class="info-row"><span>الخط الحالي</span><b>${esc(from.owner)} • ${esc(from.number)}</b></div><div class="info-row"><span>المخصص حاليًا</span><b>${num(total)}GB</b></div><div class="info-row"><span>السعر الحالي</span><b>${money(cur.amount||c.price)}</b></div></div>
+  <div class="form-grid">
+   <div class="field"><label>استهلك كام جيجا؟ <b class="bad">*</b></label><input id="moveConsumedV29" type="number" min="0" max="${total}" placeholder="اكتب الاستهلاك الفعلي" oninput="moveConsumedHintV29('${cid}')"></div>
+   <div class="field"><label>المتبقي من الخط القديم</label><input id="moveRemainV29" disabled value="حدد الاستهلاك أولًا"></div>
+   <div class="field full"><label>الخط الجديد</label><select id="transferTargetV29">${options}</select></div>
+   <div class="field full"><label>طريقة النقل</label><select id="moveModeV29" onchange="moveModeChangedV29()"><option value="full" selected>بدء باقة جديدة كاملة على الخط الجديد</option><option value="remaining">نقل المتبقي فقط من الدورة الحالية</option></select></div>
+  </div>
+  <div id="newPackV29" class="info-card" style="margin-top:10px"><h4>الباقة الجديدة على الخط الجديد</h4><div class="form-grid">
+   <div class="field"><label>الجيجات الجديدة</label><input id="moveNewGbV29" type="number" min="1" value="${Number(c.gb||0)}"></div>
+   <div class="field"><label>السعر الجديد</label><input id="moveNewPriceV29" type="number" min="0" value="${Number(c.price||cur.amount||0)}"></div>
+   <div class="field"><label>مدفوع للباقة الجديدة الآن</label><input id="moveNewPaidV29" type="number" min="0" value="0"></div>
+   <div class="field"><label>الدقائق (متابعة فقط)</label><input id="moveNewMinutesV29" type="number" min="0" value="${Number(c.minutes??defaultMinutesV29(c.gb))}"></div>
+  </div><div class="hint">يمكنك تغيير الجيجات والسعر قبل النقل. هذه باقة جديدة مستقلة ماليًا على الخط الجديد.</div></div>`,
+  `<button class="btn" onclick="doTransferV29('${cid}')">تأكيد النقل</button><button class="btn secondary" onclick="cancelTransferV29('${cid}')">إلغاء</button>`);
+}
+function moveConsumedHintV29(cid){
+  const c=(state.customers||[]).find(x=>x.id===cid),from=lineOfV29(c),total=transferTotalV29(c,from),raw=$('#moveConsumedV29')?.value;
+  const box=$('#moveRemainV29');if(!box)return;if(raw===''){box.value='حدد الاستهلاك أولًا';return}
+  const used=Math.max(0,Math.min(total,Number(raw||0)));box.value=num(total-used)+'GB';
+}
+function moveModeChangedV29(){const full=$('#moveModeV29')?.value!=='remaining',box=$('#newPackV29');if(box)box.style.display=full?'block':'none'}
+function addConsumedV29(line,c,gb,reason){if(!(gb>0))return;state.gbAdjustments=state.gbAdjustments||[];state.gbAdjustments.push({id:uid('gba'),lineId:line.id,customerId:c.id,cycleDue:cycV29(line.group),gb:Number(gb),reason,createdAt:new Date().toISOString(),active:true})}
+function detachExtrasV29(c,from){for(const x of (state.extraGbSales||[]).filter(x=>x.active!==false&&x.gbActive!==false&&x.lineId===from.id&&x.customerId===c.id&&x.cycleDue===cycV29(from.group)))x.gbActive=false}
+function cancelTransferV29(cid){clearModalV29();if(currentPage==='customer-detail'){currentCustomerId=cid;renderCustomerDetail();showPage('customer-detail',false);return}if(_transferReturnV29?.lineId)return showLine(_transferReturnV29.lineId)}
+function doTransferV29(cid){
+  const c=(state.customers||[]).find(x=>x.id===cid&&x.active),from=lineOfV29(c),to=(state.lines||[]).find(x=>x.id===$('#transferTargetV29')?.value&&x.active);if(!c||!from||!to)return;
+  const raw=$('#moveConsumedV29')?.value;if(raw===''||raw==null)return alert('لازم تحدد العميل استهلك كام جيجا قبل النقل.');
+  const total=transferTotalV29(c,from),consumed=Number(raw);if(consumed<0||consumed>total)return alert(`الاستهلاك لازم يكون من 0 إلى ${num(total)}GB.`);
+  const remaining=Math.max(0,total-consumed),mode=$('#moveModeV29')?.value||'full';
+  let newGb=remaining,newPrice=Number(c.price||0),newPaid=Number(paymentInfo(c).paid||0),newMinutes=Number(c.minutes??defaultMinutesV29(c.gb));
+  if(mode==='full'){
+    newGb=Number($('#moveNewGbV29')?.value||0);newPrice=Number($('#moveNewPriceV29')?.value||0);newPaid=Math.max(0,Number($('#moveNewPaidV29')?.value||0));newMinutes=Math.max(0,Number($('#moveNewMinutesV29')?.value||0));
+    if(!(newGb>0))return alert('اكتب عدد الجيجات للباقة الجديدة.');if(newPrice<0)return alert('السعر غير صحيح.');if(newPaid>newPrice&&!confirm('المدفوع أكبر من سعر الباقة. هل تريد اعتباره مدفوعًا بالكامل؟'))return;
+    newPaid=Math.min(newPrice,newPaid);
+  }
+  const m=lineMetrics(to),probs=[];if(m.vacancies<=0)probs.push('لا يوجد مكان فاضي');if(newGb>m.remaining)probs.push(`الباقة الجديدة ${num(newGb)}GB والمتاح ${num(m.remaining)}GB`);if(probs.length&&!confirm('⚠️ '+probs.join('\n')+'\nهل تريد المتابعة رغم ذلك؟'))return;
+  const returnCtx={..._transferReturnV29};
+  commit(`نقل ${customerRef(c)} من ${from.number} إلى ${to.number}`,()=>{
+    addConsumedV29(from,c,consumed,'مستهلك قبل النقل');detachExtrasV29(c,from);state.customerMoves=state.customerMoves||[];
+    const mv={id:uid('mv'),customerId:c.id,fromLineId:from.id,toLineId:to.id,fromNumber:from.number,toNumber:to.number,consumed,remaining,mode,at:new Date().toISOString(),cycleDue:cycV29(from.group)};state.customerMoves.push(mv);
+    c.lineId=to.id;
+    if(mode==='full'){
+      c.gb=newGb;c.package=String(newGb);c.price=newPrice;c.paid=newPaid;c.paymentStatus=statusOf(newPrice,newPaid);c.minutes=newMinutes;c.allocationGbOverride=null;c.allocationCycleDue='';
+      state.payments.push({id:uid('pay'),customerId:c.id,dueDate:cycV29(to.group),amount:newPrice,paid:newPaid,status:statusOf(newPrice,newPaid),paidDate:newPaid>=newPrice&&newPrice>0?todayISO():'',notes:'باقة جديدة كاملة بعد النقل',createdAt:new Date().toISOString(),groupSnapshot:to.group,lineIdSnapshot:to.id,lineNumberSnapshot:to.number});
+    }else{
+      c.allocationGbOverride=remaining;c.allocationCycleDue=cycV29(to.group);
+      const p=currentPayment(c);if(p){p.lineIdSnapshot=to.id;p.lineNumberSnapshot=to.number;p.groupSnapshot=to.group}
+    }
+    c.notes=((c.notes||'')+`\nنقل ${todayISO()}: استهلك ${consumed}GB من ${total}GB، المتبقي القديم ${remaining}GB، من ${from.number} إلى ${to.number}${mode==='full'?`، وبدأ باقة جديدة ${newGb}GB بسعر ${newPrice}ج`:''}`).trim();
+  });
+  clearModalV29();toast('تم النقل وحساب الخط الجديد ✅');
+  if(returnCtx?.page==='customer-detail'){currentCustomerId=cid;renderCustomerDetail();showPage('customer-detail',false);window.scrollTo({top:0,behavior:'smooth'});return}
+  if(returnCtx?.lineId&&state.lines.some(l=>l.id===returnCtx.lineId&&l.active))return showLine(returnCtx.lineId);
+  showPage(returnCtx?.page||'customers');
+}
+window.openTransferModal=openTransferModalV29;window.openTransferModalV27=openTransferModalV29;window.doTransfer=doTransferV29;window.doTransferV27=doTransferV29;window.doTransferV29=doTransferV29;window.moveConsumedHintV29=moveConsumedHintV29;window.moveModeChangedV29=moveModeChangedV29;window.cancelTransferV29=cancelTransferV29;
+try{openTransferModalV27=openTransferModalV29;doTransferV27=doTransferV29}catch(e){}
+
+/* ---------- bulk entry: active reservations are transferable, not hard errors ---------- */
+function bulkResV29(phone){return activeResV29(phone)}
+function hydrateBulkFromResV29(row,r){
+  if(!row||!r)return;row.reservationId=r.id;row.reservationAction=row.reservationAction||'transfer';
+  if(!row.name)row.name=r.name||'';if(!row.contact)row.contact=r.contact||r.whatsapp||'';if(!Number(row.gb||0))row.gb=String(Number(r.package||0));
+  if(row.price===''||row.price==null)row.price=String(Number(r.amount||0));if((row.paid===''||row.paid==='0'||row.paid==null)&&Number(r.paid||0)>0)row.paid=String(Number(r.paid||0));
+  if(row.minutes==null)row.minutes=Number(r.minutes??defaultMinutesV29(r.package));
+}
+function bulkRowChangedV29(id,field,value){
+  const r=(_bulkRows||[]).find(x=>x.id===id);if(!r)return;if(['phone','contact','gb'].includes(field))value=arToEnDigits(value);r[field]=value;
+  if(field==='phone'){
+    const rs=phoneOk(value)?bulkResV29(value):null;if(rs)hydrateBulkFromResV29(r,rs);else{delete r.reservationId;delete r.reservationAction}
+  }
+  if(field==='gb'){
+    const l=(state.lines||[]).find(x=>x.id===$('#bulkLineV2')?.value),p=l?quickPriceFor(l.network,Number(value)):null;if(p!==null&&!r.reservationId)r.price=String(p);
+    if(!r.minutesManual)r.minutes=defaultMinutesV29(value);
+  }
+  renderBulkRowsV29();
+}
+function setBulkResActionV29(id,action){const r=(_bulkRows||[]).find(x=>x.id===id);if(!r)return;r.reservationAction=action;renderBulkRowsV29()}
+function editBulkReservationV29(id){
+  const row=(_bulkRows||[]).find(x=>x.id===id),r=row?.reservationId?(state.reservations||[]).find(x=>x.id===row.reservationId):null;if(!r)return;
+  _bulkResumeV29={lineId:$('#bulkLineV2')?.value||'',rows:JSON.parse(JSON.stringify(_bulkRows)),rowId:id};
+  openReservationModal(r.id);
+}
+function validateBulkRowsV29(){
+  const lid=$('#bulkLineV2')?.value,l=(state.lines||[]).find(x=>x.id===lid),m=l?lineMetrics(l):null,seen=new Set();let slots=m?.vacancies||0,cap=m?.remaining||0;const rows=[];
+  for(const src of (_bulkRows||[])){
+    const r={...src},phone=arToEnDigits(r.phone||''),contact=arToEnDigits(r.contact||''),gb=Number(arToEnDigits(r.gb||0)),price=Number(r.price||0),paid=Number(r.paid||0);let err='',skip=false,res=phoneOk(phone)?bulkResV29(phone):null;
+    if(!phoneOk(phone))err='رقم العميل لازم 11 رقم';else if(contact&&!phoneOk(contact))err='رقم التواصل غير صحيح';else if(seen.has(phone))err='الرقم مكرر داخل الإدخال';else if((state.customers||[]).some(c=>c.active&&c.phone===phone))err='الرقم موجود بالفعل كعميل نشط';
+    if(!err&&res){hydrateBulkFromResV29(r,res);if((r.reservationAction||'transfer')==='skip')skip=true;}
+    const finalGb=Number(arToEnDigits(r.gb||gb||0));
+    if(!err&&!skip&&!(finalGb>0))err='اكتب الباقة';else if(!err&&!skip&&slots<=0)err='الأماكن غير كافية';else if(!err&&!skip&&cap<finalGb)err=`الجيجات غير كافية — المتاح ${num(cap)}GB`;
+    if(!err&&!skip){slots--;cap-=finalGb}
+    seen.add(phone);rows.push({...r,phone,contact,gb:finalGb,price:Number(r.price||price||0),paid:Number(r.paid||paid||0),reservation:res||null,skip,err});
+  }
+  return{l,m,rows,errors:rows.filter(r=>r.err),valid:rows.filter(r=>!r.err&&!r.skip),skipped:rows.filter(r=>r.skip),remainingSlots:slots,remainingGb:cap};
+}
+function renderBulkRowsV29(){
+  const box=$('#bulkRowsV2');if(!box)return;const l=(state.lines||[]).find(x=>x.id===$('#bulkLineV2')?.value);
+  for(const row of (_bulkRows||[])){const rs=phoneOk(row.phone)?bulkResV29(row.phone):null;if(rs)hydrateBulkFromResV29(row,rs)}
+  box.innerHTML=(_bulkRows||[]).map((r,i)=>{const rs=r.reservationId?(state.reservations||[]).find(x=>x.id===r.reservationId&&x.active!==false):null,act=r.reservationAction||'transfer';return `<div class="bulk-row-card" id="bulkrow_${r.id}"><div class="bulk-row-head"><b>فرد ${i+1}</b><button class="bulk-remove" type="button" onclick="removeBulkPerson('${r.id}')">✕</button></div>
+   ${rs?`<div class="alert warn bulk-res-v29"><b>📌 الرقم موجود في الحجز</b> — ${esc(rs.name||'بدون اسم')} • ${num(Number(rs.package||0))}GB • ${money(rs.amount)}<div class="actions" style="margin-top:7px"><button type="button" class="btn good small" onclick="setBulkResActionV29('${r.id}','transfer')">${act==='transfer'?'✓ ':''}نقل من الحجز</button><button type="button" class="btn secondary small" onclick="editBulkReservationV29('${r.id}')">✏️ تعديل الحجز</button><button type="button" class="btn secondary small" onclick="setBulkResActionV29('${r.id}','skip')">${act==='skip'?'✓ ':''}تجاهل الصف</button></div></div>`:''}
+   <div class="bulk-fields"><div class="field"><label>رقم العميل</label><input maxlength="11" inputmode="numeric" value="${esc(r.phone)}" oninput="bulkRowChangedV29('${r.id}','phone',this.value)"></div><div class="field"><label>رقم التواصل</label><input maxlength="11" inputmode="numeric" value="${esc(r.contact||'')}" oninput="bulkRowChangedV29('${r.id}','contact',this.value)"></div><div class="field full-mobile"><label>الاسم (اختياري)</label><input value="${esc(r.name||'')}" oninput="bulkRowChangedV29('${r.id}','name',this.value)"></div><div class="field"><label>الباقة GB</label><input inputmode="numeric" value="${esc(r.gb||'')}" placeholder="20" oninput="bulkRowChangedV29('${r.id}','gb',this.value)"></div><div class="field"><label>السعر</label><input type="number" min="0" value="${esc(r.price??'')}" oninput="bulkRowChangedV29('${r.id}','price',this.value)"></div><div class="field"><label>مدفوع</label><input type="number" min="0" value="${esc(r.paid??'0')}" oninput="bulkRowChangedV29('${r.id}','paid',this.value)"></div><div class="field"><label>الدقائق</label><input type="number" min="0" value="${Number(r.minutes??defaultMinutesV29(r.gb))}" oninput="bulkMinutesChangedV26('${r.id}',this.value)"></div></div><div class="hint">${rs?'بيانات الحجز تم تحميلها تلقائيًا. اختر نقل أو تعديل أو تجاهل.':l?'السعر التلقائي حسب '+esc(l.network):''}</div></div>`}).join('');renderBulkSummaryV29();
+}
+function renderBulkSummaryV29(){
+  const box=$('#bulkSummaryV2');if(!box)return;const v=validateBulkRowsV29();$$('.bulk-row-card').forEach(x=>x.classList.remove('bulk-error'));v.errors.forEach(r=>$('#bulkrow_'+r.id)?.classList.add('bulk-error'));
+  const totalGb=v.valid.reduce((s,r)=>s+r.gb,0),totalDue=v.valid.reduce((s,r)=>s+Number(r.price||0),0),moves=v.valid.filter(r=>r.reservation).length;
+  box.innerHTML=`<div><b>جاهز: ${num(v.valid.length)}</b> • نقل من الحجز: <b>${num(moves)}</b> • متجاهل: <b>${num(v.skipped.length)}</b> • أخطاء: <b class="${v.errors.length?'bad':'good'}">${num(v.errors.length)}</b> • الباقات: <b class="good">${num(totalGb)}GB</b> • المطلوب: <b>${money(totalDue)}</b></div>${v.errors.length?`<div class="bad" style="margin-top:6px">${v.errors.map(r=>`فرد ${(_bulkRows||[]).findIndex(x=>x.id===r.id)+1}: ${esc(r.err)}`).join(' • ')}</div>`:`<div class="good" style="margin-top:6px">✓ الصفوف الجاهزة يمكن حفظها</div>`}`;
+}
+function openBulkAddV29(lineId='',resume=false){
+  const active=(state.lines||[]).filter(l=>l.active),line=(state.lines||[]).find(x=>x.id===lineId)||active[0];if(!line)return toast('أضف خط أساسي أولًا');setReturnToLine(line.id);if(!resume)initBulkRows();
+  modal('👥 إدخال جماعي — باقات منفصلة',`<div class="alert good">لو الرقم موجود في الحجز، يمكنك نقله مباشرة لهذا الخط بدون حذف الحجز يدويًا. بيانات الحجز ستظهر تلقائيًا.</div><div class="field"><label>الخط الأساسي</label><select id="bulkLineV2" onchange="renderBulkRowsV29()">${active.map(l=>`<option value="${l.id}" ${l.id===line.id?'selected':''}>${esc(l.group+' • '+l.owner+' • '+l.number)}</option>`).join('')}</select></div><div id="bulkRowsV2" class="bulk-builder" style="margin-top:12px"></div><button class="btn secondary" type="button" onclick="addBulkPerson()" style="margin-top:10px">+ فرد آخر</button><div id="bulkSummaryV2" class="bulk-summary"></div>`,`<button class="btn" onclick="saveBulkAddV29()">✅ حفظ الكل</button>`);setTimeout(renderBulkRowsV29,20);
+}
+function saveBulkAddV29(){
+  const v=validateBulkRowsV29();if(!v.l)return alert('اختار الخط الأساسي');if(v.errors.length)return alert('في صفوف محتاجة مراجعة. الصفوف الغلط محددة بالأحمر.');if(!v.valid.length)return alert('لا توجد صفوف جاهزة للحفظ.');
+  for(const r of v.valid){if(typeof window.unpricedDecisionV26==='function'){const d=window.unpricedDecisionV26(v.l.network,r.gb,r.customerType==='dealer'?'dealer':'customer',r.price);if(!d.ok)return;r.price=Number(d.price);const src=(_bulkRows||[]).find(x=>x.id===r.id);if(src)src.price=String(r.price)}}
+  const activation=todayISO(),due=cycV29(v.l.group,activation),next=nextGroupBoundary(v.l.group,activation);let added=0,moved=0;
+  commit('إدخال جماعي '+v.valid.length+' أفراد على '+v.l.number,()=>{
+    for(const r of v.valid){
+      const rs=r.reservation?(state.reservations||[]).find(x=>x.id===r.reservation.id):null;let c=null;
+      if(rs?.sourceCustomerId)c=(state.customers||[]).find(x=>x.id===rs.sourceCustomerId&&x.active===false);
+      if(c){c.active=true;c.archivedAt='';c.archivedReason='';c.lineId=v.l.id;c.name=r.name||rs.name||c.name||'';c.phone=r.phone;c.whatsapp=r.contact||rs.contact||c.whatsapp||'';c.gb=r.gb;c.package=String(r.gb);c.price=Number(r.price||0);c.paid=Number(r.paid||0);c.paymentStatus=statusOf(c.price,c.paid);c.activation=activation;c.nextRenewal=next;c.renewal=next;c.renewalStatus='تم التجديد';c.lastRenewedAt=activation;c.minutes=Number(r.minutes??defaultMinutesV29(r.gb));c.allocationGbOverride=null;c.allocationCycleDue='';}
+      else{c={id:uid('cust'),name:(r.name||rs?.name||'').trim(),phone:r.phone,whatsapp:r.contact||rs?.contact||'',lineId:v.l.id,package:String(r.gb),gb:r.gb,price:Number(r.price||0),paid:Number(r.paid||0),paymentStatus:statusOf(r.price,r.paid),activation,nextRenewal:next,renewal:next,renewals:0,regularity:'غير محدد',source:'غير محدد',notes:rs?`تم النقل من الحجز بالإدخال الجماعي${rs.notes?' — '+rs.notes:''}`:'إضافة جماعية',active:true,renewalStatus:'تم التجديد',lastRenewedAt:activation,minutes:Number(r.minutes??defaultMinutesV29(r.gb)),createdAt:new Date().toISOString()};state.customers.push(c)}
+      state.payments.push({id:uid('pay'),customerId:c.id,dueDate:due,amount:Number(r.price||0),paid:Math.min(Number(r.price||0),Number(r.paid||0)),status:statusOf(r.price,r.paid),paidDate:Number(r.paid||0)>=Number(r.price||0)&&Number(r.price||0)>0?todayISO():'',notes:rs?'تفعيل من الحجز عبر الإدخال الجماعي':'إضافة جماعية',createdAt:new Date().toISOString(),groupSnapshot:v.l.group,lineIdSnapshot:v.l.id,lineNumberSnapshot:v.l.number});
+      if(rs){state.reservations=(state.reservations||[]).filter(x=>x.id!==rs.id);moved++}else added++;
+    }
+    state.settings.lastCustomerLineId=v.l.id;
+  });
+  quickAddSessionCount+=v.valid.length;clearModalV29();toast(`تم الحفظ ✅ ${moved?`• نقل ${moved} من الحجز`:''}`);showLine(v.l.id);
+}
+window.bulkRowChangedV29=bulkRowChangedV29;window.setBulkResActionV29=setBulkResActionV29;window.editBulkReservationV29=editBulkReservationV29;window.renderBulkRowsV29=renderBulkRowsV29;window.saveBulkAddV29=saveBulkAddV29;
+try{bulkRowChanged=bulkRowChangedV29;renderBulkRows=renderBulkRowsV29;validateBulkRowsV2=validateBulkRowsV29;renderBulkSummary=renderBulkSummaryV29;openBulkAdd=openBulkAddV29;saveBulkAddV2=saveBulkAddV29}catch(e){}
+window.openBulkAdd=openBulkAddV29;window.saveBulkAddV2=saveBulkAddV29;
+
+/* When editing a reservation from a bulk row, return to the same bulk session after save. */
+const _saveReservationV29Base=window.saveReservationV25;
+if(typeof _saveReservationV29Base==='function')window.saveReservationV25=function(id=''){
+  const resume=_bulkResumeV29?JSON.parse(JSON.stringify(_bulkResumeV29)):null;
+  const out=_saveReservationV29Base.apply(this,arguments);
+  if(resume&&id){setTimeout(()=>{_bulkRows=resume.rows||[];const edited=(state.reservations||[]).find(r=>r.id===id),row=(_bulkRows||[]).find(x=>x.id===resume.rowId);if(row&&edited){row.name=edited.name||row.name;row.contact=edited.contact||row.contact;row.gb=String(edited.package||row.gb);row.price=String(edited.amount??row.price);row.paid=String(edited.paid??row.paid);row.minutes=Number(edited.minutes??row.minutes??defaultMinutesV29(edited.package));row.reservationId=edited.id;row.reservationAction='transfer'}_bulkResumeV29=null;openBulkAddV29(resume.lineId,true)},60)}
+  return out;
+};
+try{saveReservationV25=window.saveReservationV25}catch(e){}
+
+/* ---------- reservations: searchable list + flexible actions ---------- */
+function resActiveV29(r){return r&&r.active!==false&&r.status!=='تم التفعيل'&&r.status!=='ملغي'}
+function reservationCardV29(r){const target=r.targetGroup||(window.targetGroupForV25?window.targetGroupForV25(r.network,r.createdAt||new Date()):r.network);return `<article class="result-card reservation-v25-card clickable-card" data-rid="${r.id}" onclick="openReservationModal('${r.id}')"><div class="type">${esc(r.network)} • ${esc(target)} • ${esc(r.status||'جديد')}</div><h4>${esc(r.name||'بدون اسم')}</h4><p><b>${esc(r.phone)}</b> • ${num(Number(r.package||0))}GB • ${money(r.amount)}</p><p>الدفع: <span class="${Number(r.paid||0)>=Number(r.amount||0)?'good':Number(r.paid||0)>0?'warn':'bad'}">${esc(r.paymentStatus||statusOf(r.amount,r.paid))}</span></p><div class="actions" onclick="event.stopPropagation()"><button class="btn small" onclick="activateReservation('${r.id}')">تفعيل كعميل</button><button class="btn secondary small" onclick="openReservationModal('${r.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveReservationV24('${r.id}')">🗃️ أرشفة</button></div></article>`}
+function refreshReservationsV29(){const q=(($('#reservationSearchV29')?.value||'')+'').trim().toLowerCase(),box=$('#reservationListV29');if(!box)return;const rows=(state.reservations||[]).filter(resActiveV29).filter(r=>!q||(String(r.name||'')+' '+String(r.phone||'')+' '+String(r.contact||'')+' '+String(r.package||'')+' '+String(r.network||'')+' '+String(r.targetGroup||'')).toLowerCase().includes(q)).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));box.innerHTML=rows.map(reservationCardV29).join('')||'<div class="empty">لا توجد حجوزات مطابقة</div>'}
+function openReservationsV29(){
+  const et=window.targetGroupForV25?window.targetGroupForV25('اتصالات'): 'اتصالات',we=window.targetGroupForV25?window.targetGroupForV25('WE'):'WE';
+  modal('📋 الحجوزات',`<div class="smart-analysis-bar"><button class="btn smart-et" onclick="openSmartAnalysisV25('اتصالات')">🧠 تحليل اتصالات — ${esc(String(et).replace('اتصالات ',''))}</button><button class="btn smart-we" onclick="openSmartAnalysisV25('WE')">🧠 تحليل WE — ${esc(String(we).replace('WE ',''))}</button></div><div class="toolbar" style="margin:10px 0"><div class="searchbox"><input id="reservationSearchV29" placeholder="ابحث بالاسم أو رقم العميل أو التواصل أو الباقة..." oninput="refreshReservationsV29()"></div><button class="btn booking" onclick="openReservationModal()">+ حجز جديد</button></div><div id="reservationListV29" class="cards-list"></div>`);setTimeout(refreshReservationsV29,10)
+}
+window.refreshReservationsV29=refreshReservationsV29;window.openReservations=openReservationsV29;try{openReservations=openReservationsV29}catch(e){}
+
+/* ---------- global search: reservations can open/edit/archive/activate ---------- */
+function runGlobalSearchV29(){
+  const q=(($('#globalQ')?.value||'')+'').trim().toLowerCase(),out=[];if(!q){const b=$('#globalResults');if(b)b.innerHTML='<div class="empty">ابدأ الكتابة للبحث</div>';return}
+  (state.customers||[]).filter(c=>c.active&&(String(c.name||'')+' '+c.phone+' '+String(c.whatsapp||'')+' '+c.gb+' '+c.package).toLowerCase().includes(q)).slice(0,20).forEach(c=>{const l=lineOfV29(c),p=paymentInfo(c);out.push(`<div class="result-card clickable-card" onclick="closeModal();openCustomerDetails('${c.id}')"><div class="type">عميل</div><h4>${esc(customerDisplayName(c))}</h4><p>${esc(c.phone)} • ${esc(l?.group||'')} • ${num(c.gb)}GB • ${p.remaining?'باقي '+money(p.remaining):'مدفوع'}</p><span class="open-hint">اضغط لفتح العميل ←</span></div>`)});
+  (state.lines||[]).filter(l=>(String(l.owner||'')+' '+String(l.number||'')+' '+String(l.group||'')).toLowerCase().includes(q)).slice(0,12).forEach(l=>{const m=lineMetrics(l);out.push(`<div class="result-card clickable-card" onclick="closeModal();showLine('${l.id}')"><div class="type">خط أساسي</div><h4>${esc(l.owner)} • ${esc(l.number)}</h4><p>${esc(l.group)} • متبقي ${num(m.remaining)}GB • ${m.vacancies} مكان</p><span class="open-hint">اضغط لفتح الخط ←</span></div>`)});
+  (state.wireless||[]).filter(w=>(String(w.customerName||'')+' '+String(w.phone||'')+' '+String(w.simNumber||'')+' '+String(w.type||'')).toLowerCase().includes(q)).slice(0,12).forEach(w=>out.push(`<div class="result-card clickable-card" onclick="closeModal();showWireless('${w.id}')"><div class="type">${esc(w.type||'Air / iHome')}</div><h4>${esc(w.customerName||'بدون اسم')}</h4><p>${esc(w.simNumber||w.phone||'رقم الشريحة غير مسجل')} • ${num(w.packageGb)}GB</p><span class="open-hint">اضغط لفتح التفاصيل ←</span></div>`));
+  (state.reservations||[]).filter(resActiveV29).filter(r=>(String(r.name||'')+' '+String(r.phone||'')+' '+String(r.contact||'')+' '+String(r.network||'')+' '+String(r.package||'')).toLowerCase().includes(q)).slice(0,12).forEach(r=>out.push(`<div class="result-card reservation-v25-card clickable-card" onclick="openReservationModal('${r.id}')"><div class="type">حجز • ${esc(r.network)} • ${esc(r.targetGroup||'')}</div><h4>${esc(r.name||'بدون اسم')}</h4><p>${esc(r.phone)} • ${num(Number(r.package||0))}GB • ${money(r.amount)}</p><div class="actions" onclick="event.stopPropagation()"><button class="btn small" onclick="activateReservation('${r.id}')">تفعيل كعميل</button><button class="btn secondary small" onclick="openReservationModal('${r.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveReservationV24('${r.id}')">🗃️ أرشفة</button></div></div>`));
+  const b=$('#globalResults');if(b)b.innerHTML=out.join('')||'<div class="empty">لا توجد نتيجة</div>';
+}
+window.runGlobalSearch=runGlobalSearchV29;try{runGlobalSearch=runGlobalSearchV29}catch(e){}
+
+/* ---------- branding ---------- */
+function stampV29(){document.title='مدير الخطوط الجديد V2.9';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('#v24Badge,#v25Badge,#v26Badge,#v27Badge,#v28Badge,#v29Badge,.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v29Badge" class="v26-version">V2.9</span>')}}
+const _renderAllV29Base=renderAll;renderAll=function(){const r=_renderAllV29Base.apply(this,arguments);stampV29();return r};
+
+const fixed=repairMovedPaymentContextsV29();state.settings=state.settings||{};state.settings.appVersion=V29;state.schemaVersion=Math.max(Number(state.schemaVersion||1),9);storageSet(STORAGE_KEY,JSON.stringify(state));stampV29();renderAll();if(fixed)console.info('V2.9 repaired moved payment contexts:',fixed);if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});console.info('Manager Lines V2.9 active');
+})();
+</script>
+
+<script id="familyLinesV29ReturnPatch">
+(function(){
+'use strict';
+let _reservationReturnV29=null;
+const baseOpen=window.openReservationModal;
+if(typeof baseOpen==='function')window.openReservationModal=function(id=''){
+  if(id){
+    if(document.querySelector('#reservationListV29'))_reservationReturnV29={kind:'reservations',q:document.querySelector('#reservationSearchV29')?.value||''};
+    else if(document.querySelector('#globalQ'))_reservationReturnV29={kind:'global',q:document.querySelector('#globalQ')?.value||''};
+  }
+  return baseOpen.apply(this,arguments);
+};
+try{openReservationModal=window.openReservationModal}catch(e){}
+const baseSave=window.saveReservationV25;
+if(typeof baseSave==='function')window.saveReservationV25=function(id=''){
+  const ret=_reservationReturnV29?_reservationReturnV29:null;
+  const bulk=typeof _bulkResumeV29!=='undefined'&&_bulkResumeV29;
+  const out=baseSave.apply(this,arguments);
+  if(ret&&id&&!bulk){
+    _reservationReturnV29=null;
+    setTimeout(()=>{
+      if(ret.kind==='reservations'){window.openReservations();setTimeout(()=>{const x=document.querySelector('#reservationSearchV29');if(x){x.value=ret.q||'';window.refreshReservationsV29?.()}},20)}
+      else if(ret.kind==='global'){openGlobalSearch();setTimeout(()=>{const x=document.querySelector('#globalQ');if(x){x.value=ret.q||'';window.runGlobalSearch?.()}},20)}
+    },60);
+  }
+  return out;
+};
+try{saveReservationV25=window.saveReservationV25}catch(e){}
+})();
+</script>
+
+<script id="familyLinesV210Patch">
+(function(){
+'use strict';
+const V210='2.10';
+
+/* ===== V2.10: current-cycle accounting + automatic renewal + simpler payment state ===== */
+function cycleStartV210(group){
+  if(typeof cycleDueV27==='function')return cycleDueV27(group);
+  const d=parseDate(todayISO()),day=groupDay(group);let y=d.getFullYear(),m=d.getMonth();if(d.getDate()<day)m--;const x=new Date(y,m,Math.min(day,new Date(y,m+1,0).getDate()));return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-');
+}
+function cycleNextV210(group){const s=cycleStartV210(group);return typeof addMonthsV27==='function'?addMonthsV27(s,1):nextGroupBoundary(group,s)}
+function paymentInCycleV210(c,l){
+  if(!c||!l)return null;const start=cycleStartV210(l.group),next=cycleNextV210(l.group);
+  const rows=(state.payments||[]).filter(p=>p.customerId===c.id&&String(p.dueDate||'')>=start&&String(p.dueDate||'')<next);
+  const onLine=rows.filter(p=>p.lineIdSnapshot===l.id),legacy=rows.filter(p=>!p.lineIdSnapshot);
+  return (onLine.length?onLine:legacy).slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))||String(b.id||'').localeCompare(String(a.id||'')))[0]||null;
+}
+function wirelessPaymentInCycleV210(w,l){
+  if(!w||!l)return null;const start=cycleStartV210(l.group),next=cycleNextV210(l.group);
+  const rows=(state.wirelessPayments||[]).filter(p=>p.wirelessId===w.id&&String(p.dueDate||'')>=start&&String(p.dueDate||'')<next);
+  const onLine=rows.filter(p=>p.lineIdSnapshot===l.id),legacy=rows.filter(p=>!p.lineIdSnapshot);
+  return (onLine.length?onLine:legacy).slice().sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))||String(b.id||'').localeCompare(String(a.id||'')))[0]||null;
+}
+function priorDebtForCustomerV210(c,l){
+  const start=cycleStartV210(l.group);return (state.payments||[]).filter(p=>p.customerId===c.id&&String(p.dueDate||'')<start).reduce((s,p)=>s+Math.max(0,Number(p.amount||0)-Number(p.paid||0)),0);
+}
+function priorDebtForWirelessV210(w,l){
+  const start=cycleStartV210(l.group);return (state.wirelessPayments||[]).filter(p=>p.wirelessId===w.id&&String(p.dueDate||'')<start).reduce((s,p)=>s+Math.max(0,Number(p.amount||0)-Number(p.paid||0)),0);
+}
+function ensureCurrentCustomerCycleV210(c,l){
+  if(!c||!l||c.active===false)return null;let p=paymentInCycleV210(c,l);const start=cycleStartV210(l.group),next=cycleNextV210(l.group);
+  if(!p){
+    const legacy=currentPayment(c),legacyPaid=(legacy&&String(legacy.dueDate||'')>=start&&String(legacy.dueDate||'')<next)?Number(legacy.paid||0):Number(c.paid||0);
+    p={id:uid('pay'),customerId:c.id,dueDate:start,amount:Number(c.price||0),paid:Math.min(Number(c.price||0),Math.max(0,legacyPaid)),status:'',paidDate:'',notes:'دورة تلقائية — العميل موجود على الخط',createdAt:new Date().toISOString(),groupSnapshot:l.group,lineIdSnapshot:l.id,lineNumberSnapshot:l.number};
+    p.status=statusOf(p.amount,p.paid);p.paidDate=p.paid>=p.amount&&p.amount>0?todayISO():'';(state.payments=state.payments||[]).push(p);
+  }else{
+    p.groupSnapshot=l.group;p.lineIdSnapshot=l.id;p.lineNumberSnapshot=l.number;
+    /* سعر العميل الحالي هو مرجع بيع الدورة الحالية. */
+    p.amount=Number(c.price||0);p.paid=Math.min(p.amount,Math.max(0,Number(p.paid||0)));p.status=statusOf(p.amount,p.paid);if(p.paid>=p.amount&&p.amount>0&&!p.paidDate)p.paidDate=todayISO();
+  }
+  c.paid=Number(p.paid||0);c.paymentStatus=statusOf(c.price,c.paid);c.pauseRenewalDue='';c.renewalStatus='تم التجديد';c.lastRenewedAt=start;c.nextRenewal=next;c.renewal=next;return p;
+}
+function ensureCurrentWirelessCycleV210(w,l){
+  if(!w||!l||w.active===false)return null;let p=wirelessPaymentInCycleV210(w,l);const start=cycleStartV210(l.group),next=cycleNextV210(l.group);
+  if(!p){p={id:uid('wpay'),wirelessId:w.id,dueDate:start,amount:Number(w.price||0),paid:Math.min(Number(w.price||0),Math.max(0,Number(w.paid||0))),status:'',paidDate:'',notes:'دورة تلقائية مع الخط',createdAt:new Date().toISOString(),groupSnapshot:l.group,lineIdSnapshot:l.id,lineNumberSnapshot:l.number};p.status=statusOf(p.amount,p.paid);p.paidDate=p.paid>=p.amount&&p.amount>0?todayISO():'';(state.wirelessPayments=state.wirelessPayments||[]).push(p)}else{p.groupSnapshot=l.group;p.lineIdSnapshot=l.id;p.lineNumberSnapshot=l.number;p.amount=Number(w.price||0);p.paid=Math.min(p.amount,Math.max(0,Number(p.paid||0)));p.status=statusOf(p.amount,p.paid)}
+  w.paid=Number(p.paid||0);w.paymentStatus=statusOf(w.price,w.paid);w.renewalStatus='تم التجديد';w.lastRenewedAt=start;w.nextRenewal=next;return p;
+}
+function ensureCyclesV210(){
+  let changed=false;for(const c of state.customers||[]){if(c.active===false)continue;const l=state.lines.find(x=>x.id===c.lineId&&x.active);if(!l)continue;const before=(state.payments||[]).length;ensureCurrentCustomerCycleV210(c,l);if((state.payments||[]).length!==before)changed=true;if(c.allocationCycleDue&&c.allocationCycleDue<cycleStartV210(l.group)){c.allocationCycleDue='';c.allocationGbOverride=null;changed=true}}
+  for(const w of state.wireless||[]){if(w.active===false)continue;const l=state.lines.find(x=>x.id===w.lineId&&x.active);if(!l)continue;const before=(state.wirelessPayments||[]).length;ensureCurrentWirelessCycleV210(w,l);if((state.wirelessPayments||[]).length!==before)changed=true}
+  try{if(typeof processCycleTransitionsV27==='function')processCycleTransitionsV27()}catch(e){}
+  return changed;
+}
+ensureCycles=ensureCyclesV210;window.ensureCycles=ensureCyclesV210;
+
+currentPayment=function(c){const l=state.lines.find(x=>x.id===c?.lineId&&x.active);if(l){const p=paymentInCycleV210(c,l);if(p)return p}return (state.payments||[]).filter(p=>p.customerId===c?.id&&p.dueDate<=todayISO()).slice().sort((a,b)=>String(b.dueDate||'').localeCompare(String(a.dueDate||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0]||null};
+currentWirelessPayment=function(w){const l=state.lines.find(x=>x.id===w?.lineId&&x.active);if(l){const p=wirelessPaymentInCycleV210(w,l);if(p)return p}return (state.wirelessPayments||[]).filter(p=>p.wirelessId===w?.id&&p.dueDate<=todayISO()).slice().sort((a,b)=>String(b.dueDate||'').localeCompare(String(a.dueDate||''))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')))[0]||null};
+paymentInfo=function(c){const l=state.lines.find(x=>x.id===c?.lineId&&x.active),p=l?paymentInCycleV210(c,l):currentPayment(c),amount=Number(c?.price||p?.amount||0),paid=Math.min(amount,Math.max(0,Number(p?.paid??c?.paid??0))),remaining=Math.max(0,amount-paid);return{amount,paid,remaining,status:statusOf(amount,paid),due:p?.dueDate||c?.activation||'',days:remaining&&p?.dueDate?Math.max(0,diffDays(todayISO(),p.dueDate)):0,p,previousDebt:l?priorDebtForCustomerV210(c,l):0}};
+wirelessPaymentInfo=function(w){const l=state.lines.find(x=>x.id===w?.lineId&&x.active),p=l?wirelessPaymentInCycleV210(w,l):currentWirelessPayment(w),amount=Number(w?.price||p?.amount||0),paid=Math.min(amount,Math.max(0,Number(p?.paid??w?.paid??0))),remaining=Math.max(0,amount-paid);return{amount,paid,remaining,status:statusOf(amount,paid),due:p?.dueDate||w?.activation||'',days:remaining&&p?.dueDate?Math.max(0,diffDays(todayISO(),p.dueDate)):0,p,previousDebt:l?priorDebtForWirelessV210(w,l):0}};
+
+/* One active customer = one current sale. Old/duplicate payment rows never inflate current sales. */
+lineFinancials=function(l){
+  const cs=lineCustomers(l.id),customerInfos=cs.map(c=>({c,i:paymentInfo(c)}));
+  const membersDue=cs.reduce((s,c)=>s+Number(c.price||0),0),membersCollected=customerInfos.reduce((s,x)=>s+Number(x.i.paid||0),0),membersOutstanding=customerInfos.reduce((s,x)=>s+Number(x.i.remaining||0),0),mobilePreviousDebt=customerInfos.reduce((s,x)=>s+Number(x.i.previousDebt||0),0);
+  const w=linkedWirelessForLine(l.id),wi=w?wirelessPaymentInfo(w):null,wirelessDue=w?Number(w.price||0):0,wirelessCollected=wi?Number(wi.paid||0):0,wirelessOutstanding=wi?Number(wi.remaining||0):0,wirePreviousDebt=wi?Number(wi.previousDebt||0):0;
+  const xs=typeof currentCycleExtraRowsV27==='function'?currentCycleExtraRowsV27(l.id):(state.extraGbSales||[]).filter(x=>x.active!==false&&x.lineId===l.id&&x.cycleDue===cycleStartV210(l.group));
+  const extraDue=xs.reduce((s,x)=>s+Number(x.amount||0),0),extraCollected=xs.reduce((s,x)=>s+Math.min(Number(x.amount||0),Math.max(0,Number(x.paid??x.amount??0))),0),extraOutstanding=Math.max(0,extraDue-extraCollected);
+  const invoice=Number(l.cost||0),totalDue=membersDue+wirelessDue+extraDue,totalCollected=membersCollected+wirelessCollected+extraCollected,totalOutstanding=membersOutstanding+wirelessOutstanding+extraOutstanding,previousDebt=mobilePreviousDebt+wirePreviousDebt,totalReceivable=totalOutstanding+previousDebt;
+  return{invoice,membersDue,membersCollected,membersOutstanding,wirelessDue,wirelessCollected,wirelessOutstanding,extraDue,extraCollected,extraOutstanding,totalDue,totalCollected,totalOutstanding,previousDebt,totalReceivable,netProfit:totalDue-invoice,expectedProfit:totalDue-invoice,cashPosition:totalCollected-invoice,invoiceRemaining:Math.max(0,invoice-totalCollected),collectedSurplus:Math.max(0,totalCollected-invoice),wireless:w};
+};
+groupMetrics=function(group){const lines=(state.lines||[]).filter(l=>l.active&&l.group===group),rows=lines.map(l=>({l,m:lineMetrics(l),f:lineFinancials(l)})),invoice=rows.reduce((s,x)=>s+x.f.invoice,0),collected=rows.reduce((s,x)=>s+x.f.totalCollected,0);return{lines:lines.length,membersUsed:rows.reduce((s,x)=>s+x.m.used,0),memberSlots:rows.reduce((s,x)=>s+x.m.max,0),remaining:rows.reduce((s,x)=>s+Math.max(0,x.m.remaining),0),linesWithGb:rows.filter(x=>x.m.remaining>0).length,linesOpen:rows.filter(x=>x.m.remaining>0&&x.m.vacancies>0).length,linesFullWithGb:rows.filter(x=>x.m.remaining>0&&x.m.vacancies===0).length,vacancies:rows.reduce((s,x)=>s+(x.m.remaining>0?x.m.vacancies:0),0),invoice,membersDue:rows.reduce((s,x)=>s+x.f.membersDue,0),wirelessDue:rows.reduce((s,x)=>s+x.f.wirelessDue,0),totalSales:rows.reduce((s,x)=>s+x.f.totalDue,0),collected,outstanding:rows.reduce((s,x)=>s+x.f.totalOutstanding,0),previousDebt:rows.reduce((s,x)=>s+x.f.previousDebt,0),totalReceivable:rows.reduce((s,x)=>s+x.f.totalReceivable,0),netProfit:rows.reduce((s,x)=>s+x.f.netProfit,0),cashPosition:collected-invoice,invoiceRemaining:Math.max(0,invoice-collected),customerUnpaidCount:state.customers.filter(c=>c.active&&customerLine(c)?.group===group&&paymentInfo(c).remaining>0).length,customerOutstanding:state.customers.filter(c=>c.active&&customerLine(c)?.group===group).reduce((s,c)=>s+paymentInfo(c).remaining,0),lineBills:typeof lineBillGroupSummaryV25==='function'?lineBillGroupSummaryV25(group):null};};
+overallFinancials=function(){const fs=(state.lines||[]).filter(l=>l.active).map(lineFinancials),invoices=fs.reduce((s,f)=>s+f.invoice,0),totalDue=fs.reduce((s,f)=>s+f.totalDue,0),collected=fs.reduce((s,f)=>s+f.totalCollected,0),outstanding=fs.reduce((s,f)=>s+f.totalOutstanding,0),previousDebt=fs.reduce((s,f)=>s+f.previousDebt,0);return{invoices,totalDue,collected,outstanding,previousDebt,totalReceivable:outstanding+previousDebt,netProfit:totalDue-invoices,cashPosition:collected-invoices,invoiceRemaining:Math.max(0,invoices-collected)}};
+
+/* ===== paid/unpaid selector instead of a second amount field ===== */
+const _openCustomerModalV210Base=openCustomerModal;
+openCustomerModal=function(id='',prefill=null){const out=_openCustomerModalV210Base.apply(this,arguments);setTimeout(()=>{const c=id?(state.customers||[]).find(x=>x.id===id):null,info=c?paymentInfo(c):null,price=Number(c?.price??prefill?.price??$('#fCustPrice')?.value??0),paid=Number(info?.paid??prefill?.paid??0);const label=[...document.querySelectorAll('#modalRoot .field label')].find(x=>x.textContent.trim()==='مدفوع الآن');if(!label)return;const field=label.closest('.field'),partial=paid>0&&paid<price;field.innerHTML=`<label>حالة الدفع</label><select id="fCustPaidState" data-existing-paid="${paid}"><option value="unpaid" ${paid===0?'selected':''}>غير مدفوع</option><option value="paid" ${price>0&&paid>=price?'selected':''}>مدفوع</option>${partial?'<option value="keep" selected>مدفوع جزئيًا — احتفظ بالمبلغ الحالي</option>':''}</select><input id="fCustPaid" type="hidden" value="${paid}"><span class="hint">الدفع الجزئي يتم من زر «دفع مبلغ» بعد الحفظ.</span>`},0);return out};
+const _saveCustomerV210Base=saveCustomer;
+saveCustomer=function(id='',after='close'){const st=$('#fCustPaidState');if(st){const price=Number($('#fCustPrice')?.value||0),existing=Number(st.dataset.existingPaid||0),paid=st.value==='paid'?price:st.value==='keep'?Math.min(price,existing):0;const h=$('#fCustPaid');if(h)h.value=paid}return _saveCustomerV210Base.apply(this,arguments)};
+window.openCustomerModal=openCustomerModal;window.saveCustomer=saveCustomer;
+
+/* Transfer starts a full new package. Keep the consumed-GB question mandatory, but payment is a simple status. */
+const _openTransferModalV210Base=openTransferModal;
+openTransferModal=function(cid){const out=_openTransferModalV210Base.apply(this,arguments);setTimeout(()=>{const old=$('#moveNewPaidV29');if(!old)return;const field=old.closest('.field');field.innerHTML=`<label>حالة دفع الباقة الجديدة</label><select id="moveNewPaidStateV210" onchange="syncMovePaidV210()"><option value="unpaid" selected>غير مدفوع</option><option value="paid">مدفوع</option></select><input id="moveNewPaidV29" type="hidden" value="0"><span class="hint">لو دفع جزء بعد النقل استخدم زر «دفع مبلغ».</span>`;const price=$('#moveNewPriceV29');if(price){const oldHandler=price.getAttribute('oninput')||'';price.setAttribute('oninput',oldHandler+';syncMovePaidV210()')}} ,0);return out};
+function syncMovePaidV210(){const s=$('#moveNewPaidStateV210'),h=$('#moveNewPaidV29');if(s&&h)h.value=s.value==='paid'?Number($('#moveNewPriceV29')?.value||0):0}
+window.openTransferModal=openTransferModal;window.syncMovePaidV210=syncMovePaidV210;
+
+/* ===== active means renewed automatically. No manual renew / skip-renew flow. ===== */
+function autoRenewNoticeV210(){toast('طالما العميل موجود على خط أساسي، التجديد يتم تلقائيًا مع دورة الخط ✅')}
+recordRenewal=autoRenewNoticeV210;window.recordRenewal=autoRenewNoticeV210;
+if(typeof recordWirelessRenewal!=='undefined'){recordWirelessRenewal=autoRenewNoticeV210;window.recordWirelessRenewal=autoRenewNoticeV210}
+window.setSkipRenewalV27=autoRenewNoticeV210;window.cancelSkipRenewalV27=autoRenewNoticeV210;
+function stripManualRenewV210(root=document){
+  root.querySelectorAll('button').forEach(b=>{const t=(b.textContent||'').trim();if(b.classList.contains('renew')||t.includes('لن يجدد')||t.includes('إلغاء عدم التجديد'))b.remove()});
+  root.querySelectorAll('.stat').forEach(s=>{const lab=s.querySelector('.label')?.textContent?.trim();if(lab==='حالة التجديد')s.remove()});
+  root.querySelectorAll('.member-money span').forEach(s=>{if((s.textContent||'').trim().startsWith('التجديد'))s.remove()});
+}
+
+/* ===== full base-line number at the top, in cards, and in search ===== */
+function decorateCustomerTopV210(){const c=(state.customers||[]).find(x=>x.id===currentCustomerId&&x.active),l=c?customerLine(c):null,top=$('#page-customer-detail .detail-top div');if(!c||!top)return;const p=top.querySelector('p');if(p)p.innerHTML=`رقم العميل: <b class="ltr">${esc(c.phone)}</b> • الخط الأساسي: <b class="ltr">${esc(l?.number||'-')}</b> • ${esc(l?.group||'بدون خط')}`;stripManualRenewV210($('#page-customer-detail'));if(typeof scheduleDecorateV27==='function')scheduleDecorateV27()}
+const _renderCustomerDetailV210Base=renderCustomerDetail;
+renderCustomerDetail=function(){const r=_renderCustomerDetailV210Base.apply(this,arguments);decorateCustomerTopV210();const c=(state.customers||[]).find(x=>x.id===currentCustomerId&&x.active),l=c?customerLine(c):null;if(c&&l){const statBox=$('#page-customer-detail .detail-stats');if(statBox&&!statBox.querySelector('.current-cycle-v210'))statBox.insertAdjacentHTML('beforeend',`<div class="stat current-cycle-v210"><div class="label">الدورة الحالية</div><div class="value detail-date">${esc(cycleStartV210(l.group))}</div><div class="sub">تجديد تلقائي • القادم ${esc(cycleNextV210(l.group))}</div></div>`);const d=priorDebtForCustomerV210(c,l);const paySec=[...$('#page-customer-detail').querySelectorAll('.info-card')].find(x=>x.querySelector('h3')?.textContent.includes('تفاصيل التحصيل'));if(paySec&&d>0&&!paySec.querySelector('.old-debt-v210'))paySec.insertAdjacentHTML('afterbegin',`<div class="alert warn old-debt-v210">ديون سابقة منفصلة عن الدورة الحالية: <b>${money(d)}</b></div>`)}return r};window.renderCustomerDetail=renderCustomerDetail;
+
+const _refreshCustomersV210Base=refreshCustomersList;
+refreshCustomersList=function(){const r=_refreshCustomersV210Base.apply(this,arguments);for(const card of $$('#customersList .customer-list-card')){const id=(String(card.getAttribute('onclick')||'').match(/openCustomerDetails\('([^']+)'\)/)||[])[1],c=state.customers.find(x=>x.id===id),l=c?customerLine(c):null,p=card.querySelector('.member-head p');if(c&&p)p.textContent=`${c.phone} • ${l?.group||'بدون خط'} • الخط الأساسي ${l?.number||'-'}`};stripManualRenewV210($('#customersList'));if(typeof scheduleDecorateV27==='function')scheduleDecorateV27();return r};window.refreshCustomersList=refreshCustomersList;
+
+const _showLineV210Base=showLine;
+showLine=function(id){const r=_showLineV210Base.apply(this,arguments);setTimeout(()=>{const l=state.lines.find(x=>x.id===id),root=$('#modalRoot');if(!l||!root)return;const hero=root.querySelector('.line-detail-hero h3');if(hero)hero.textContent=`${l.owner} • ${l.number}`;const mh=root.querySelector('.modal-head h3');if(mh)mh.textContent=`${l.owner} • ${l.number}`;stripManualRenewV210(root);const f=lineFinancials(l),strong=root.querySelector('.sales-strong-v27');if(strong){const vals=strong.querySelectorAll('b');if(vals[0])vals[0].textContent=money(f.totalDue);if(vals[1])vals[1].textContent=money(f.totalCollected);if(vals[2])vals[2].textContent=money(f.totalOutstanding);if(vals[3])vals[3].textContent=profitText(f.netProfit);strong.querySelector('.wide')?.remove();if(f.previousDebt>0)strong.insertAdjacentHTML('beforeend',`<div class="wide"><span>ديون سابقة — لا تدخل في مبيعات أو ربح الدورة</span><b class="bad">${money(f.previousDebt)}</b></div>`)}if(typeof scheduleDecorateV27==='function')scheduleDecorateV27()},0);return r};window.showLine=showLine;
+
+const _refreshLinesV210Base=refreshLinesList;
+refreshLinesList=function(){const r=_refreshLinesV210Base.apply(this,arguments);for(const card of $$('#linesList .line-card')){const id=(String(card.getAttribute('onclick')||'').match(/showLine\('([^']+)'\)/)||[])[1],l=state.lines.find(x=>x.id===id);if(!l)continue;const h=card.querySelector('h3,h4');if(h)h.textContent=`${l.owner} • ${l.number}`;const f=lineFinancials(l),sales=card.querySelector('.sales-line-v27');if(sales){const bs=sales.querySelectorAll('b');if(bs[0])bs[0].textContent=money(f.totalDue);if(bs[1])bs[1].textContent=money(f.totalCollected);if(bs[2])bs[2].textContent=money(f.totalOutstanding)}}if(typeof scheduleDecorateV27==='function')scheduleDecorateV27();return r};window.refreshLinesList=refreshLinesList;
+
+const _showGroupDetailsV210Base=showGroupDetails;
+showGroupDetails=function(group){const r=_showGroupDetailsV210Base.apply(this,arguments);setTimeout(()=>{for(const card of $$('#modalRoot .group-line-card')){const id=(String(card.getAttribute('onclick')||'').match(/showLine\('([^']+)'\)/)||[])[1],l=state.lines.find(x=>x.id===id),h=card.querySelector('h4');if(l&&h)h.textContent=`${l.owner} • ${l.number}`}if(typeof scheduleDecorateV27==='function')scheduleDecorateV27()},0);return r};window.showGroupDetails=showGroupDetails;
+
+/* Collection cards no longer offer a manual renew action. */
+const _collectionCardHtmlV210Base=collectionCardHtml;
+collectionCardHtml=function(){return _collectionCardHtmlV210Base.apply(this,arguments).replace(/<button class="btn renew small"[\s\S]*?<\/button>/g,'')};window.collectionCardHtml=collectionCardHtml;
+
+/* Wireless: renewal is automatic with the linked base line; show the full base number. */
+const _showWirelessV210Base=showWireless;
+showWireless=function(id){const r=_showWirelessV210Base.apply(this,arguments);setTimeout(()=>{const w=state.wireless.find(x=>x.id===id),l=w?state.lines.find(x=>x.id===w.lineId):null,root=$('#modalRoot');if(!root)return;stripManualRenewV210(root);for(const row of root.querySelectorAll('.info-row'))if(row.querySelector('span')?.textContent.trim()==='الخط الأساسي المرتبط'&&l)row.querySelector('b').textContent=`${l.owner} • ${l.number} • ${l.group}`;if(typeof scheduleDecorateV27==='function')scheduleDecorateV27()},0);return r};window.showWireless=showWireless;
+
+function runGlobalSearchV210(){
+  const q=(($('#globalQ')?.value||'')+'').trim().toLowerCase(),out=[];if(!q){const b=$('#globalResults');if(b)b.innerHTML='<div class="empty">ابدأ الكتابة للبحث</div>';return}
+  (state.customers||[]).filter(c=>c.active&&(String(c.name||'')+' '+c.phone+' '+String(c.whatsapp||'')+' '+c.gb+' '+c.package+' '+String(customerLine(c)?.number||'')).toLowerCase().includes(q)).slice(0,20).forEach(c=>{const l=customerLine(c),p=paymentInfo(c);out.push(`<div class="result-card clickable-card" onclick="closeModal();openCustomerDetails('${c.id}')"><div class="type">عميل</div><h4>${esc(customerDisplayName(c))}</h4><p>رقم العميل ${esc(c.phone)} • ${num(c.gb)}GB • ${p.remaining?'باقي '+money(p.remaining):'مدفوع'}</p><p>الخط الأساسي: <b>${esc(l?.number||'-')}</b> • ${esc(l?.group||'')}</p><span class="open-hint">اضغط لفتح العميل ←</span></div>`)});
+  (state.lines||[]).filter(l=>(String(l.owner||'')+' '+String(l.number||'')+' '+String(l.group||'')).toLowerCase().includes(q)).slice(0,12).forEach(l=>{const m=lineMetrics(l);out.push(`<div class="result-card clickable-card" onclick="closeModal();showLine('${l.id}')"><div class="type">خط أساسي</div><h4>${esc(l.owner)} • ${esc(l.number)}</h4><p>${esc(l.group)} • متبقي ${num(m.remaining)}GB • ${m.vacancies} مكان</p><span class="open-hint">اضغط لفتح الخط ←</span></div>`)});
+  (state.wireless||[]).filter(w=>(String(w.customerName||'')+' '+String(w.phone||'')+' '+String(w.simNumber||'')+' '+String(w.type||'')).toLowerCase().includes(q)).slice(0,12).forEach(w=>{const l=state.lines.find(x=>x.id===w.lineId);out.push(`<div class="result-card clickable-card" onclick="closeModal();showWireless('${w.id}')"><div class="type">${esc(w.type||'Air / iHome')}</div><h4>${esc(w.customerName||'بدون اسم')}</h4><p>${esc(w.simNumber||w.phone||'رقم الشريحة غير مسجل')} • ${num(w.packageGb)}GB${l?' • الخط '+esc(l.number):''}</p><span class="open-hint">اضغط لفتح التفاصيل ←</span></div>`)});
+  (state.reservations||[]).filter(r=>typeof resActiveV29==='function'?resActiveV29(r):r.active!==false).filter(r=>(String(r.name||'')+' '+String(r.phone||'')+' '+String(r.contact||'')+' '+String(r.network||'')+' '+String(r.package||'')).toLowerCase().includes(q)).slice(0,12).forEach(r=>out.push(`<div class="result-card reservation-v25-card clickable-card" onclick="openReservationModal('${r.id}')"><div class="type">حجز • ${esc(r.network)} • ${esc(r.targetGroup||'')}</div><h4>${esc(r.name||'بدون اسم')}</h4><p>${esc(r.phone)} • ${num(Number(r.package||0))}GB • ${money(r.amount)}</p><div class="actions" onclick="event.stopPropagation()"><button class="btn small" onclick="activateReservation('${r.id}')">تفعيل كعميل</button><button class="btn secondary small" onclick="openReservationModal('${r.id}')">✏️ تعديل</button><button class="btn bad small" onclick="archiveReservationV24('${r.id}')">🗃️ أرشفة</button></div></div>`));
+  const b=$('#globalResults');if(b)b.innerHTML=out.join('')||'<div class="empty">لا توجد نتيجة</div>';if(typeof scheduleDecorateV27==='function')scheduleDecorateV27();
+}
+runGlobalSearch=runGlobalSearchV210;window.runGlobalSearch=runGlobalSearchV210;
+
+/* ===== version + migration ===== */
+function stampV210(){document.title='مدير الخطوط الجديد V2.10';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v210Badge" class="v26-version">V2.10</span>')}}
+const _renderAllV210Base=renderAll;renderAll=function(){ensureCyclesV210();const r=_renderAllV210Base.apply(this,arguments);stampV210();stripManualRenewV210(document);if(typeof scheduleDecorateV27==='function')scheduleDecorateV27();return r};window.renderAll=renderAll;
+
+for(const c of state.customers||[]){if(c.active!==false){c.pauseRenewalDue='';c.renewalStatus='تم التجديد'}}
+ensureCyclesV210();state.settings=state.settings||{};state.settings.appVersion=V210;state.schemaVersion=Math.max(Number(state.schemaVersion||1),10);storageSet(STORAGE_KEY,JSON.stringify(state));stampV210();renderAll();
+if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{});
+console.info('Manager Lines V2.10 active');
+})();
+</script>
+
+<script id="familyLinesV210FinanceUiHotfix">
+(function(){
+'use strict';
+/* Group detail must use the same current-cycle sales rule, including sold extra GB. */
+const _showGroupDetailsV210FinanceBase=showGroupDetails;
+showGroupDetails=function(group){const r=_showGroupDetailsV210FinanceBase.apply(this,arguments);setTimeout(()=>{const gm=groupMetrics(group),stats=$$('#modalRoot .stat');for(const s of stats){const lab=s.querySelector('.label')?.textContent?.trim(),val=s.querySelector('.value');if(!val)continue;if(lab==='إجمالي المبيعات/المطلوب'||lab==='إجمالي المبيعات')val.textContent=money(gm.totalSales);if(lab==='باقي عند العملاء'||lab==='باقي التحصيل')val.textContent=money(gm.outstanding)}if(gm.previousDebt>0&&!$('#modalRoot .group-old-debt-v210')){const summary=$('#modalRoot .group-finance-summary');summary?.insertAdjacentHTML('afterend',`<div class="alert warn group-old-debt-v210">ديون سابقة منفصلة عن مبيعات وربح الدورة الحالية: <b>${money(gm.previousDebt)}</b></div>`)}if(typeof scheduleDecorateV27==='function')scheduleDecorateV27()},0);return r};
+window.showGroupDetails=showGroupDetails;
+})();
+</script>
+
 </body></html>
