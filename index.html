@@ -3340,4 +3340,114 @@ window.showGroupDetails=showGroupDetails;
 })();
 </script>
 
+<!-- Firebase Cloud Sync V3.0 -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style id="cloudV300Styles">
+.cloud-pill-v300{position:relative}.cloud-pill-v300[data-state="online"]{border-color:rgba(34,197,94,.5);color:#86efac}.cloud-pill-v300[data-state="sync"]{border-color:rgba(56,189,248,.55);color:#7dd3fc}.cloud-pill-v300[data-state="off"]{color:#a89bb8}.cloud-dot-v300{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-left:3px;vertical-align:middle}.cloud-card-v300{border-color:rgba(56,189,248,.35)!important;background:linear-gradient(145deg,rgba(14,36,55,.75),rgba(20,10,37,.9))!important}.cloud-user-v300{display:flex;align-items:center;gap:10px;margin:10px 0}.cloud-avatar-v300{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#161020;border:1px solid var(--line)}.cloud-user-v300 b{display:block}.cloud-user-v300 small{display:block;color:var(--muted);margin-top:3px;direction:ltr;text-align:right}.cloud-status-v300{padding:9px 11px;border-radius:12px;background:#0c0a15;border:1px solid rgba(255,255,255,.07);margin:8px 0;font-size:12px}.cloud-actions-v300{display:flex;gap:7px;flex-wrap:wrap}.cloud-warn-v300{color:#fbbf24}.cloud-good-v300{color:#86efac}.cloud-info-v300{color:#7dd3fc}.cloud-sync-panel-v300{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.cloud-sync-panel-v300>div{background:#0c0915;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:9px}.cloud-sync-panel-v300 span{display:block;color:var(--muted);font-size:10px}.cloud-sync-panel-v300 b{display:block;margin-top:4px;font-size:13px}
+@media(max-width:480px){.cloud-actions-v300 .btn{flex:1 1 45%}}
+</style>
+<script id="familyLinesCloudV300">
+(function(){
+'use strict';
+const CLOUD_APP_VERSION='3.0 Cloud';
+const CLOUD_CONFIG={
+  apiKey:'AIzaSyClmxhc4mQDsuyfuzF9MrDRdIhq-_-tRmo',
+  authDomain:'family-lines-1c633.firebaseapp.com',
+  projectId:'family-lines-1c633',
+  storageBucket:'family-lines-1c633.firebasestorage.app',
+  messagingSenderId:'888010442595',
+  appId:'1:888010442595:web:6a97497b57da38144db556',
+  measurementId:'G-5PFQSMBLRE'
+};
+const CLOUD_DEVICE_KEY='manager_lines_cloud_device_v1';
+const CLOUD_OWNER_KEY='manager_lines_cloud_owner_uid_v1';
+const CLOUD_VERSION_KEY='manager_lines_cloud_version_v1';
+const CLOUD_HASH_KEY='manager_lines_cloud_hash_v1';
+const CLOUD_LAST_SYNC_KEY='manager_lines_cloud_last_sync_v1';
+const CLOUD_PART_SIZE=220000;
+let cloudAuth=null,cloudDb=null,cloudUser=null,cloudReady=false,cloudApplying=false,cloudTimer=null,cloudUnsub=null,cloudStatus='غير متصل',cloudBusy=false,cloudQueued=false,cloudLastHash='';
+
+function cloudDeviceId(){let x=storageGet(CLOUD_DEVICE_KEY);if(!x){x='dev_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9);storageSet(CLOUD_DEVICE_KEY,x)}return x}
+function cloudHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)+'_'+s.length}
+function cloudNowText(){return new Date().toLocaleString('ar-EG',{dateStyle:'short',timeStyle:'short'})}
+function cloudSyncCol(uid){return cloudDb.collection('users').doc(uid).collection('sync')}
+function cloudCounts(s=state){return `${(s.lines||[]).filter(x=>x.active!==false).length} خط • ${(s.customers||[]).filter(x=>x.active!==false).length} عميل • ${(s.reservations||[]).filter(x=>x.active!==false&&x.status!=='تم التفعيل').length} حجز`}
+function cloudEsc(v){return typeof esc==='function'?esc(v):String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function cloudSetStatus(s){cloudStatus=s;cloudRefreshUi()}
+function cloudRefreshUi(){
+  const btn=document.querySelector('#cloudTopBtnV300');if(btn){btn.dataset.state=cloudUser?(cloudBusy?'sync':'online'):'off';btn.title=cloudUser?(cloudBusy?'جارِ المزامنة':'متصل بالسحابة'):'تسجيل الدخول والمزامنة';btn.innerHTML=`☁️${cloudUser?'<span class="cloud-dot-v300"></span>':''}`}
+  if(currentPage==='more'&&typeof renderMore==='function'&&!cloudBusy){const card=document.querySelector('.cloud-card-v300');if(card)card.outerHTML=cloudCardHtmlV300()}
+}
+function cloudCardHtmlV300(){
+  const last=storageGet(CLOUD_LAST_SYNC_KEY)||'لم تتم مزامنة بعد';
+  if(!cloudUser)return `<div class="setting-card cloud-card-v300"><h3>☁️ المزامنة بحساب Google</h3><p class="muted">افتح نفس البيانات على أكثر من جهاز بنفس حساب Gmail.</p><div class="cloud-status-v300 cloud-warn-v300">غير مسجل الدخول — بيانات هذا الجهاز ما زالت محفوظة محليًا.</div><button class="btn" onclick="cloudGoogleSignInV300()">تسجيل الدخول بحساب Google</button></div>`;
+  return `<div class="setting-card cloud-card-v300"><h3>☁️ المزامنة السحابية</h3><div class="cloud-user-v300">${cloudUser.photoURL?`<img class="cloud-avatar-v300" src="${cloudEsc(cloudUser.photoURL)}" alt="">`:'<div class="cloud-avatar-v300" style="display:grid;place-items:center">G</div>'}<div><b>${cloudEsc(cloudUser.displayName||'حساب Google')}</b><small>${cloudEsc(cloudUser.email||'')}</small></div></div><div class="cloud-status-v300 ${cloudBusy?'cloud-info-v300':'cloud-good-v300'}">${cloudEsc(cloudStatus)}</div><div class="cloud-sync-panel-v300"><div><span>بيانات الجهاز</span><b>${cloudEsc(cloudCounts())}</b></div><div><span>آخر مزامنة</span><b>${cloudEsc(last)}</b></div></div><div class="cloud-actions-v300"><button class="btn" onclick="cloudSyncNowV300()">🔄 مزامنة الآن</button><button class="btn secondary" onclick="cloudDownloadConfirmV300()">⬇️ تنزيل من السحابة</button><button class="btn secondary" onclick="cloudUploadConfirmV300()">⬆️ رفع هذا الجهاز</button><button class="btn bad" onclick="cloudSignOutV300()">خروج من Google</button></div><p class="muted" style="margin-top:9px">أي تعديل يُحفظ على الجهاز فورًا ثم يُرفع تلقائيًا للسحابة. النسخة الاحتياطية JSON تظل متاحة.</p></div>`;
+}
+function cloudInstallTopButton(){const a=document.querySelector('.top-actions');if(a&&!document.querySelector('#cloudTopBtnV300')){const b=document.createElement('button');b.id='cloudTopBtnV300';b.className='icon-btn cloud-pill-v300';b.dataset.state='off';b.innerHTML='☁️';b.onclick=cloudOpenPanelV300;a.prepend(b)}}
+function cloudOpenPanelV300(){showPage('more');setTimeout(()=>document.querySelector('.cloud-card-v300')?.scrollIntoView({behavior:'smooth',block:'center'}),80)}
+
+async function cloudReadV300(uid){
+  const col=cloudSyncCol(uid),metaSnap=await col.doc('meta').get();if(!metaSnap.exists)return null;const meta=metaSnap.data()||{},parts=Math.max(0,Number(meta.parts||0));if(!parts)return null;
+  const refs=[];for(let i=0;i<parts;i++)refs.push(col.doc('part_'+String(i).padStart(3,'0')).get());const snaps=await Promise.all(refs);let raw='';for(const s of snaps){if(!s.exists)throw new Error('جزء من النسخة السحابية غير موجود');raw+=String(s.data()?.data||'')}
+  const parsed=JSON.parse(raw);return {state:typeof migrate==='function'?migrate(parsed):parsed,raw,version:Number(meta.version||0),deviceId:meta.deviceId||'',updatedText:meta.updatedText||'',appVersion:meta.appVersion||'',parts};
+}
+async function cloudWriteV300(force=false){
+  if(!cloudUser||cloudApplying)return false;if(cloudBusy){cloudQueued=true;return false}const raw=JSON.stringify(state),hash=cloudHash(raw);if(!force&&hash===cloudLastHash)return true;
+  cloudBusy=true;cloudSetStatus('جارِ رفع أحدث البيانات…');
+  try{
+    const col=cloudSyncCol(cloudUser.uid),metaRef=col.doc('meta'),oldSnap=await metaRef.get(),oldParts=oldSnap.exists?Number(oldSnap.data()?.parts||0):0,parts=[];for(let i=0;i<raw.length;i+=CLOUD_PART_SIZE)parts.push(raw.slice(i,i+CLOUD_PART_SIZE));
+    const batch=cloudDb.batch();parts.forEach((data,i)=>batch.set(col.doc('part_'+String(i).padStart(3,'0')),{data,index:i}));for(let i=parts.length;i<oldParts;i++)batch.delete(col.doc('part_'+String(i).padStart(3,'0')));
+    const version=Date.now(),updatedText=cloudNowText();batch.set(metaRef,{version,parts:parts.length,deviceId:cloudDeviceId(),updatedText,appVersion:CLOUD_APP_VERSION,email:cloudUser.email||''});await batch.commit();
+    cloudLastHash=hash;storageSet(CLOUD_HASH_KEY,hash);storageSet(CLOUD_VERSION_KEY,String(version));storageSet(CLOUD_LAST_SYNC_KEY,updatedText);storageSet(CLOUD_OWNER_KEY,cloudUser.uid);cloudSetStatus('متزامن ✅');return true;
+  }catch(e){console.error('Cloud upload failed',e);cloudSetStatus('تعذر الرفع — البيانات محفوظة على الجهاز');toast('تعذر المزامنة السحابية، بياناتك المحلية محفوظة');return false}finally{cloudBusy=false;cloudRefreshUi();if(cloudQueued){cloudQueued=false;setTimeout(()=>cloudWriteV300(false),250)}}
+}
+function cloudScheduleV300(){if(!cloudReady||!cloudUser||cloudApplying)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(()=>cloudWriteV300(false),900)}
+async function cloudApplyV300(pack,notify=true){
+  if(!pack?.state)return false;cloudApplying=true;try{snapshot();state=pack.state;if(typeof ensureCyclesV210==='function')ensureCyclesV210();else if(typeof ensureCycles==='function')ensureCycles();const raw=JSON.stringify(state);_storageSetCloudBase(STORAGE_KEY,raw);cloudLastHash=cloudHash(raw);_storageSetCloudBase(CLOUD_HASH_KEY,cloudLastHash);_storageSetCloudBase(CLOUD_VERSION_KEY,String(pack.version||0));_storageSetCloudBase(CLOUD_LAST_SYNC_KEY,pack.updatedText||cloudNowText());_storageSetCloudBase(CLOUD_OWNER_KEY,cloudUser.uid);renderAll();if(notify)toast('تم تنزيل أحدث البيانات من السحابة ✅');return true}finally{cloudApplying=false;cloudReady=true;cloudSetStatus('متزامن ✅')}}
+async function cloudDownloadV300(notify=true){if(!cloudUser)return false;cloudBusy=true;cloudSetStatus('جارِ تنزيل البيانات…');try{const pack=await cloudReadV300(cloudUser.uid);if(!pack){cloudSetStatus('لا توجد بيانات سحابية بعد');return null}await cloudApplyV300(pack,notify);return pack}catch(e){console.error(e);cloudSetStatus('تعذر تنزيل البيانات');alert('تعذر تنزيل البيانات من السحابة. بيانات الجهاز لم تتغير.');return false}finally{cloudBusy=false;cloudRefreshUi()}}
+
+function cloudFirstChoiceV300(hasCloud,pack){
+  if(hasCloud){
+    modal('☁️ بيانات سحابية موجودة',`<div class="alert good">تم العثور على بيانات محفوظة على هذا الحساب.</div><div class="info-card"><div class="info-row"><span>السحابة</span><b>${cloudEsc(cloudCounts(pack.state))}</b></div><div class="info-row"><span>هذا الجهاز</span><b>${cloudEsc(cloudCounts())}</b></div><div class="info-row"><span>آخر تحديث سحابي</span><b>${cloudEsc(pack.updatedText||'-')}</b></div></div><p class="muted">لو ده جهاز جديد اختار «استخدام بيانات السحابة». رفع بيانات الجهاز سيستبدل النسخة السحابية الحالية.</p>`,`<button class="btn good" onclick="closeModal();cloudUsePackV300()">⬇️ استخدام بيانات السحابة</button><button class="btn secondary" onclick="cloudUploadConfirmV300(true)">⬆️ استبدالها ببيانات الجهاز</button>`);window._pendingCloudPackV300=pack;
+  }else{
+    modal('☁️ تفعيل المزامنة',`<div class="alert good">الحساب متصل بنجاح.</div><p>لا توجد بيانات محفوظة في السحابة لهذا الحساب حتى الآن.</p><div class="info-card"><div class="info-row"><span>سيتم رفع</span><b>${cloudEsc(cloudCounts())}</b></div></div><p class="muted">ده الاختيار المناسب لأول مرة على موبايلك الأساسي.</p>`,`<button class="btn good" onclick="closeModal();cloudUploadCurrentV300(true)">⬆️ رفع بيانات هذا الجهاز للسحابة</button><button class="btn secondary" onclick="closeModal()">لاحقًا</button>`)
+  }
+}
+async function cloudUsePackV300(){const p=window._pendingCloudPackV300;window._pendingCloudPackV300=null;if(p)await cloudApplyV300(p,true)}
+async function cloudUploadCurrentV300(first=false){closeModal();cloudReady=true;const ok=await cloudWriteV300(true);if(ok&&first)toast('تم إنشاء النسخة السحابية الأولى ✅');cloudListenV300()}
+async function cloudUploadConfirmV300(fromModal=false){if(!cloudUser)return cloudGoogleSignInV300();if(!confirm('سيتم رفع بيانات هذا الجهاز واستبدال أحدث نسخة موجودة في السحابة. متابعة؟'))return;if(fromModal)closeModal();await cloudUploadCurrentV300(false)}
+async function cloudDownloadConfirmV300(){if(!cloudUser)return cloudGoogleSignInV300();if(!confirm('سيتم استبدال بيانات هذا الجهاز بأحدث نسخة من السحابة. تم حفظ إمكانية التراجع لآخر حالة محلية. متابعة؟'))return;await cloudDownloadV300(true)}
+async function cloudSyncNowV300(){if(!cloudUser)return cloudGoogleSignInV300();await cloudWriteV300(true)}
+
+function cloudListenV300(){
+  if(cloudUnsub){cloudUnsub();cloudUnsub=null}if(!cloudUser)return;const metaRef=cloudSyncCol(cloudUser.uid).doc('meta');cloudUnsub=metaRef.onSnapshot(async snap=>{if(!snap.exists||!cloudReady||cloudApplying||cloudBusy)return;const m=snap.data()||{},v=Number(m.version||0),localV=Number(storageGet(CLOUD_VERSION_KEY)||0);if(m.deviceId&&m.deviceId!==cloudDeviceId()&&v>localV){cloudSetStatus('تحديث جديد من جهاز آخر…');await cloudDownloadV300(false);toast('وصل تحديث من جهاز آخر ✅')}} ,e=>console.warn('Cloud listener',e));
+}
+async function cloudAfterLoginV300(user){
+  cloudUser=user;cloudReady=false;cloudSetStatus('جارِ فحص السحابة…');try{const pack=await cloudReadV300(user.uid),owner=storageGet(CLOUD_OWNER_KEY),localVersion=Number(storageGet(CLOUD_VERSION_KEY)||0);if(!pack){cloudFirstChoiceV300(false,null);return}if(owner===user.uid){if(pack.version>localVersion)await cloudApplyV300(pack,true);else{cloudReady=true;cloudLastHash=storageGet(CLOUD_HASH_KEY)||cloudHash(JSON.stringify(state));cloudSetStatus('متزامن ✅')}cloudListenV300();return}cloudFirstChoiceV300(true,pack)}catch(e){console.error(e);cloudReady=true;cloudSetStatus('متصل — تعذر فحص السحابة');cloudListenV300()}}
+async function cloudGoogleSignInV300(){
+  if(!cloudAuth)return alert('خدمة Google لم تُحمّل بعد. تأكد من اتصال الإنترنت وحاول مرة أخرى.');const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});cloudSetStatus('جارِ فتح تسجيل الدخول…');try{await cloudAuth.signInWithPopup(provider)}catch(e){console.error(e);if(e.code==='auth/popup-blocked')alert('المتصفح منع نافذة تسجيل الدخول. افتح موقع البرنامج في Chrome وحاول مرة أخرى.');else if(e.code!=='auth/popup-closed-by-user')alert('تعذر تسجيل الدخول: '+(e.message||e.code||'خطأ غير معروف'))}}
+async function cloudSignOutV300(){if(!cloudAuth)return;if(!confirm('تسجيل الخروج من Google؟ بيانات هذا الجهاز لن تُحذف.'))return;await cloudAuth.signOut();toast('تم تسجيل الخروج — البيانات المحلية كما هي')}
+
+/* Save locally first, then schedule cloud sync. */
+const _storageSetCloudBase=storageSet;
+storageSet=function(k,v){_storageSetCloudBase(k,v);if(k===STORAGE_KEY)cloudScheduleV300()};window.storageSet=storageSet;
+
+/* Add cloud card to More without changing existing functionality. */
+const _renderMoreCloudBase=renderMore;
+renderMore=function(){const r=_renderMoreCloudBase.apply(this,arguments),grid=document.querySelector('#page-more .settings-grid');if(grid&&!grid.querySelector('.cloud-card-v300'))grid.insertAdjacentHTML('afterbegin',cloudCardHtmlV300());cloudInstallTopButton();return r};window.renderMore=renderMore;
+
+function cloudStampV300(){document.title='مدير الخطوط الجديد V3.0 Cloud';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],[id^="v3"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v300Badge" class="v26-version">V3.0 ☁️</span>')}cloudInstallTopButton()}
+
+try{
+  if(!window.firebase)throw new Error('Firebase SDK لم يتم تحميله');if(!firebase.apps.length)firebase.initializeApp(CLOUD_CONFIG);cloudAuth=firebase.auth();cloudDb=firebase.firestore();cloudAuth.useDeviceLanguage();cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});cloudAuth.onAuthStateChanged(u=>{if(u)cloudAfterLoginV300(u);else{cloudUser=null;cloudReady=false;cloudLastHash='';if(cloudUnsub){cloudUnsub();cloudUnsub=null}cloudSetStatus('غير متصل')}});
+  state.settings=state.settings||{};state.settings.appVersion=CLOUD_APP_VERSION;state.schemaVersion=Math.max(Number(state.schemaVersion||1),11);_storageSetCloudBase(STORAGE_KEY,JSON.stringify(state));cloudStampV300();renderAll();setTimeout(cloudInstallTopButton,100);
+}catch(e){console.error('Firebase init failed',e);cloudStatus='تعذر تحميل خدمة Google';cloudStampV300();renderAll()}
+
+window.cloudGoogleSignInV300=cloudGoogleSignInV300;window.cloudSignOutV300=cloudSignOutV300;window.cloudSyncNowV300=cloudSyncNowV300;window.cloudDownloadConfirmV300=cloudDownloadConfirmV300;window.cloudUploadConfirmV300=cloudUploadConfirmV300;window.cloudUploadCurrentV300=cloudUploadCurrentV300;window.cloudUsePackV300=cloudUsePackV300;window.cloudOpenPanelV300=cloudOpenPanelV300;
+console.info('Manager Lines V3.0 Cloud active');
+})();
+</script>
+
 </body></html>
