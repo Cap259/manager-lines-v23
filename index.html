@@ -3340,6 +3340,9 @@ window.showGroupDetails=showGroupDetails;
 })();
 </script>
 
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <!-- Firebase Cloud Sync V3.0 -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -3351,16 +3354,18 @@ window.showGroupDetails=showGroupDetails;
 <script id="familyLinesCloudV300">
 (function(){
 'use strict';
-const CLOUD_APP_VERSION='3.0.1 Cloud';
+const CLOUD_APP_VERSION='3.0.2 Cloud';
 const CLOUD_CONFIG={
   apiKey:'AIzaSyClmxhc4mQDsuyfuzF9MrDRdIhq-_-tRmo',
   authDomain:'family-lines-1c633.firebaseapp.com',
   projectId:'family-lines-1c633',
   storageBucket:'family-lines-1c633.firebasestorage.app',
   messagingSenderId:'888010442595',
-  appId:'1:888010442595:web:6a97497b57da38144db556',
+  appId:'1:888010442595:web:09dfe34dbee98abe4db556',
   measurementId:'G-5PFQSMBLRE'
 };
+const GOOGLE_WEB_CLIENT_ID='888010442595-sdf63cvkg0hgqtcs79gkburgai1399or.apps.googleusercontent.com';
+let cloudGsiReadyV302=false,cloudGsiInitV302=false;
 const CLOUD_DEVICE_KEY='manager_lines_cloud_device_v1';
 const CLOUD_OWNER_KEY='manager_lines_cloud_owner_uid_v1';
 const CLOUD_VERSION_KEY='manager_lines_cloud_version_v1';
@@ -3382,7 +3387,7 @@ function cloudRefreshUi(){
 }
 function cloudCardHtmlV300(){
   const last=storageGet(CLOUD_LAST_SYNC_KEY)||'لم تتم مزامنة بعد';
-  if(!cloudUser)return `<div class="setting-card cloud-card-v300"><h3>☁️ المزامنة بحساب Google</h3><p class="muted">افتح نفس البيانات على أكثر من جهاز بنفس حساب Gmail.</p><div class="cloud-status-v300 cloud-warn-v300">غير مسجل الدخول — بيانات هذا الجهاز ما زالت محفوظة محليًا.</div><button class="btn" onclick="cloudGoogleSignInV300()">تسجيل الدخول بحساب Google</button></div>`;
+  if(!cloudUser)return `<div class="setting-card cloud-card-v300"><h3>☁️ المزامنة بحساب Google</h3><p class="muted">افتح نفس البيانات على أكثر من جهاز بنفس حساب Gmail.</p><div class="cloud-status-v300 cloud-warn-v300">${cloudEsc(cloudStatus||'غير مسجل الدخول — بيانات هذا الجهاز ما زالت محفوظة محليًا.')}</div><div id="googleSignInNativeV302" style="min-height:44px;display:flex;justify-content:center;align-items:center;margin-top:10px"></div><button class="btn secondary" style="margin-top:8px" onclick="cloudGoogleSignInV300()">إظهار زر Google الرسمي</button></div>`;
   return `<div class="setting-card cloud-card-v300"><h3>☁️ المزامنة السحابية</h3><div class="cloud-user-v300">${cloudUser.photoURL?`<img class="cloud-avatar-v300" src="${cloudEsc(cloudUser.photoURL)}" alt="">`:'<div class="cloud-avatar-v300" style="display:grid;place-items:center">G</div>'}<div><b>${cloudEsc(cloudUser.displayName||'حساب Google')}</b><small>${cloudEsc(cloudUser.email||'')}</small></div></div><div class="cloud-status-v300 ${cloudBusy?'cloud-info-v300':'cloud-good-v300'}">${cloudEsc(cloudStatus)}</div><div class="cloud-sync-panel-v300"><div><span>بيانات الجهاز</span><b>${cloudEsc(cloudCounts())}</b></div><div><span>آخر مزامنة</span><b>${cloudEsc(last)}</b></div></div><div class="cloud-actions-v300"><button class="btn" onclick="cloudSyncNowV300()">🔄 مزامنة الآن</button><button class="btn secondary" onclick="cloudDownloadConfirmV300()">⬇️ تنزيل من السحابة</button><button class="btn secondary" onclick="cloudUploadConfirmV300()">⬆️ رفع هذا الجهاز</button><button class="btn bad" onclick="cloudSignOutV300()">خروج من Google</button></div><p class="muted" style="margin-top:9px">أي تعديل يُحفظ على الجهاز فورًا ثم يُرفع تلقائيًا للسحابة. النسخة الاحتياطية JSON تظل متاحة.</p></div>`;
 }
 function cloudInstallTopButton(){const a=document.querySelector('.top-actions');if(a&&!document.querySelector('#cloudTopBtnV300')){const b=document.createElement('button');b.id='cloudTopBtnV300';b.className='icon-btn cloud-pill-v300';b.dataset.state='off';b.innerHTML='☁️';b.onclick=cloudOpenPanelV300;a.prepend(b)}}
@@ -3426,22 +3431,71 @@ function cloudListenV300(){
 }
 async function cloudAfterLoginV300(user){
   cloudUser=user;cloudReady=false;cloudSetStatus('جارِ فحص السحابة…');try{const pack=await cloudReadV300(user.uid),owner=storageGet(CLOUD_OWNER_KEY),localVersion=Number(storageGet(CLOUD_VERSION_KEY)||0);if(!pack){cloudFirstChoiceV300(false,null);return}if(owner===user.uid){if(pack.version>localVersion)await cloudApplyV300(pack,true);else{cloudReady=true;cloudLastHash=storageGet(CLOUD_HASH_KEY)||cloudHash(JSON.stringify(state));cloudSetStatus('متزامن ✅')}cloudListenV300();return}cloudFirstChoiceV300(true,pack)}catch(e){console.error(e);cloudReady=true;cloudSetStatus('متصل — تعذر فحص السحابة');cloudListenV300()}}
-async function cloudGoogleSignInV300(){
-  if(!cloudAuth)return alert('خدمة Google لم تُحمّل بعد. تأكد من اتصال الإنترنت وحاول مرة أخرى.');
-  const provider=new firebase.auth.GoogleAuthProvider();
-  provider.setCustomParameters({prompt:'select_account'});
-  cloudSetStatus('جارِ الانتقال إلى تسجيل الدخول بحساب Google…');
+function cloudWaitForGsiV302(timeout=8000){
+  return new Promise((resolve,reject)=>{
+    if(window.google?.accounts?.id)return resolve(true);
+    const started=Date.now();
+    const t=setInterval(()=>{
+      if(window.google?.accounts?.id){clearInterval(t);resolve(true);return}
+      if(Date.now()-started>timeout){clearInterval(t);reject(new Error('Google Identity Services لم يتم تحميلها'));}
+    },120);
+  });
+}
+async function cloudHandleGoogleCredentialV302(response){
+  if(!cloudAuth)return;
+  if(!response?.credential){cloudSetStatus('لم يصل رمز تسجيل الدخول من Google');return}
+  cloudBusy=true;cloudSetStatus('جارِ إكمال تسجيل الدخول…');
   try{
-    sessionStorage.setItem('manager_lines_google_redirect_pending','1');
-    await cloudAuth.signInWithRedirect(provider);
+    const credential=firebase.auth.GoogleAuthProvider.credential(response.credential);
+    const result=await cloudAuth.signInWithCredential(credential);
+    if(result?.user){cloudSetStatus('تم تسجيل الدخول ✅');toast('تم تسجيل الدخول بحساب Google ✅')}
   }catch(e){
-    console.error('Google redirect sign-in failed',e);
-    sessionStorage.removeItem('manager_lines_google_redirect_pending');
-    cloudSetStatus('تعذر فتح تسجيل الدخول');
-    alert('تعذر بدء تسجيل الدخول بحساب Google: '+(e.message||e.code||'خطأ غير معروف'));
+    console.error('GIS -> Firebase credential failed',e);
+    cloudSetStatus('فشل تسجيل الدخول: '+(e.code||'خطأ'));
+    alert('تعذر تسجيل الدخول بحساب Google: '+(e.message||e.code||'خطأ غير معروف'));
+  }finally{cloudBusy=false;cloudRefreshUi()}
+}
+async function cloudRenderGoogleButtonV302(force=false){
+  if(cloudUser)return true;
+  const box=document.getElementById('googleSignInNativeV302');
+  if(!box&&!force)return false;
+  try{
+    await cloudWaitForGsiV302();
+    if(!cloudGsiInitV302){
+      google.accounts.id.initialize({
+        client_id:GOOGLE_WEB_CLIENT_ID,
+        callback:cloudHandleGoogleCredentialV302,
+        auto_select:false,
+        cancel_on_tap_outside:false
+      });
+      cloudGsiInitV302=true;
+    }
+    cloudGsiReadyV302=true;
+    if(box){
+      box.innerHTML='';
+      google.accounts.id.renderButton(box,{theme:'filled_black',size:'large',type:'standard',shape:'rectangular',text:'signin_with',logo_alignment:'left',width:Math.min(360,Math.max(240,box.clientWidth||300)),locale:'ar'});
+    }
+    return true;
+  }catch(e){
+    console.error('GIS load/render failed',e);
+    cloudSetStatus('تعذر تحميل زر Google — تأكد من الإنترنت ثم حدّث الصفحة');
+    if(box)box.innerHTML='<span class="muted">تعذر تحميل زر Google.</span>';
+    return false;
   }
 }
-async function cloudSignOutV300(){if(!cloudAuth)return;if(!confirm('تسجيل الخروج من Google؟ بيانات هذا الجهاز لن تُحذف.'))return;await cloudAuth.signOut();toast('تم تسجيل الخروج — البيانات المحلية كما هي')}
+async function cloudGoogleSignInV300(){
+  if(!cloudAuth)return alert('خدمة Firebase لم تُحمّل بعد. تأكد من اتصال الإنترنت وحاول مرة أخرى.');
+  cloudSetStatus('جارِ تجهيز تسجيل الدخول…');
+  const ok=await cloudRenderGoogleButtonV302(true);
+  if(!ok)return;
+  const box=document.getElementById('googleSignInNativeV302');
+  if(box){box.scrollIntoView({behavior:'smooth',block:'center'});toast('اضغط زر Google الرسمي الظاهر الآن')}
+  else{
+    showPage('more');
+    setTimeout(()=>{cloudRenderGoogleButtonV302();document.getElementById('googleSignInNativeV302')?.scrollIntoView({behavior:'smooth',block:'center'})},120);
+  }
+}
+async function cloudSignOutV300(){if(!cloudAuth)return;if(!confirm('تسجيل الخروج من Google؟ بيانات هذا الجهاز لن تُحذف.'))return;try{window.google?.accounts?.id?.disableAutoSelect()}catch(_){}await cloudAuth.signOut();toast('تم تسجيل الخروج — البيانات المحلية كما هي');setTimeout(cloudRenderGoogleButtonV302,120)}
 
 /* Save locally first, then schedule cloud sync. */
 const _storageSetCloudBase=storageSet;
@@ -3449,30 +3503,21 @@ storageSet=function(k,v){_storageSetCloudBase(k,v);if(k===STORAGE_KEY)cloudSched
 
 /* Add cloud card to More without changing existing functionality. */
 const _renderMoreCloudBase=renderMore;
-renderMore=function(){const r=_renderMoreCloudBase.apply(this,arguments),grid=document.querySelector('#page-more .settings-grid');if(grid&&!grid.querySelector('.cloud-card-v300'))grid.insertAdjacentHTML('afterbegin',cloudCardHtmlV300());cloudInstallTopButton();return r};window.renderMore=renderMore;
+renderMore=function(){const r=_renderMoreCloudBase.apply(this,arguments),grid=document.querySelector('#page-more .settings-grid');if(grid&&!grid.querySelector('.cloud-card-v300'))grid.insertAdjacentHTML('afterbegin',cloudCardHtmlV300());cloudInstallTopButton();setTimeout(cloudRenderGoogleButtonV302,80);return r};window.renderMore=renderMore;
 
-function cloudStampV300(){document.title='مدير الخطوط الجديد V3.0.1 Cloud';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],[id^="v3"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v300Badge" class="v26-version">V3.0.1 ☁️</span>')}cloudInstallTopButton()}
+function cloudStampV300(){document.title='مدير الخطوط الجديد V3.0.2 Cloud';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],[id^="v3"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v300Badge" class="v26-version">V3.0.2 ☁️</span>')}cloudInstallTopButton()}
 
 try{
   if(!window.firebase)throw new Error('Firebase SDK لم يتم تحميله');
   if(!firebase.apps.length)firebase.initializeApp(CLOUD_CONFIG);
   cloudAuth=firebase.auth();cloudDb=firebase.firestore();cloudAuth.useDeviceLanguage();
   cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
-  cloudAuth.getRedirectResult().then(result=>{
-    sessionStorage.removeItem('manager_lines_google_redirect_pending');
-    if(result&&result.user)cloudSetStatus('تم تسجيل الدخول ✅');
-  }).catch(e=>{
-    console.error('Google redirect result failed',e);
-    sessionStorage.removeItem('manager_lines_google_redirect_pending');
-    cloudSetStatus('تعذر إكمال تسجيل الدخول');
-    setTimeout(()=>alert('تعذر إكمال تسجيل الدخول بحساب Google: '+(e.message||e.code||'خطأ غير معروف')),150);
-  });
   cloudAuth.onAuthStateChanged(u=>{if(u)cloudAfterLoginV300(u);else{cloudUser=null;cloudReady=false;cloudLastHash='';if(cloudUnsub){cloudUnsub();cloudUnsub=null}cloudSetStatus('غير متصل')}});
-  state.settings=state.settings||{};state.settings.appVersion=CLOUD_APP_VERSION;state.schemaVersion=Math.max(Number(state.schemaVersion||1),11);_storageSetCloudBase(STORAGE_KEY,JSON.stringify(state));cloudStampV300();renderAll();setTimeout(cloudInstallTopButton,100);
+  state.settings=state.settings||{};state.settings.appVersion=CLOUD_APP_VERSION;state.schemaVersion=Math.max(Number(state.schemaVersion||1),11);_storageSetCloudBase(STORAGE_KEY,JSON.stringify(state));cloudStampV300();renderAll();setTimeout(()=>{cloudInstallTopButton();cloudRenderGoogleButtonV302()},120);
 }catch(e){console.error('Firebase init failed',e);cloudStatus='تعذر تحميل خدمة Google';cloudStampV300();renderAll()}
 
 window.cloudGoogleSignInV300=cloudGoogleSignInV300;window.cloudSignOutV300=cloudSignOutV300;window.cloudSyncNowV300=cloudSyncNowV300;window.cloudDownloadConfirmV300=cloudDownloadConfirmV300;window.cloudUploadConfirmV300=cloudUploadConfirmV300;window.cloudUploadCurrentV300=cloudUploadCurrentV300;window.cloudUsePackV300=cloudUsePackV300;window.cloudOpenPanelV300=cloudOpenPanelV300;
-console.info('Manager Lines V3.0.1 Cloud redirect auth active');
+console.info('Manager Lines V3.0.2 Cloud Google Identity Services auth active');
 })();
 </script>
 

@@ -1,10 +1,10 @@
 {
-  "name": "مدير الخطوط الجديد V3.0 Cloud",
+  "name": "مدير الخطوط الجديد V3.0.2 Cloud",
   "short_name": "مدير الخطوط",
   "description": "إدارة الخطوط والعملاء والحجوزات مع مزامنة سحابية آمنة بحساب Google عبر Firebase، مع حفظ محلي ونسخ احتياطي.",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "./?app=v300-cloud",
+  "start_url": "./?app=v302-cloud-gis",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
