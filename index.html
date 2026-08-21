@@ -3351,7 +3351,7 @@ window.showGroupDetails=showGroupDetails;
 <script id="familyLinesCloudV300">
 (function(){
 'use strict';
-const CLOUD_APP_VERSION='3.0 Cloud';
+const CLOUD_APP_VERSION='3.0.1 Cloud';
 const CLOUD_CONFIG={
   apiKey:'AIzaSyClmxhc4mQDsuyfuzF9MrDRdIhq-_-tRmo',
   authDomain:'family-lines-1c633.firebaseapp.com',
@@ -3427,7 +3427,20 @@ function cloudListenV300(){
 async function cloudAfterLoginV300(user){
   cloudUser=user;cloudReady=false;cloudSetStatus('جارِ فحص السحابة…');try{const pack=await cloudReadV300(user.uid),owner=storageGet(CLOUD_OWNER_KEY),localVersion=Number(storageGet(CLOUD_VERSION_KEY)||0);if(!pack){cloudFirstChoiceV300(false,null);return}if(owner===user.uid){if(pack.version>localVersion)await cloudApplyV300(pack,true);else{cloudReady=true;cloudLastHash=storageGet(CLOUD_HASH_KEY)||cloudHash(JSON.stringify(state));cloudSetStatus('متزامن ✅')}cloudListenV300();return}cloudFirstChoiceV300(true,pack)}catch(e){console.error(e);cloudReady=true;cloudSetStatus('متصل — تعذر فحص السحابة');cloudListenV300()}}
 async function cloudGoogleSignInV300(){
-  if(!cloudAuth)return alert('خدمة Google لم تُحمّل بعد. تأكد من اتصال الإنترنت وحاول مرة أخرى.');const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});cloudSetStatus('جارِ فتح تسجيل الدخول…');try{await cloudAuth.signInWithPopup(provider)}catch(e){console.error(e);if(e.code==='auth/popup-blocked')alert('المتصفح منع نافذة تسجيل الدخول. افتح موقع البرنامج في Chrome وحاول مرة أخرى.');else if(e.code!=='auth/popup-closed-by-user')alert('تعذر تسجيل الدخول: '+(e.message||e.code||'خطأ غير معروف'))}}
+  if(!cloudAuth)return alert('خدمة Google لم تُحمّل بعد. تأكد من اتصال الإنترنت وحاول مرة أخرى.');
+  const provider=new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({prompt:'select_account'});
+  cloudSetStatus('جارِ الانتقال إلى تسجيل الدخول بحساب Google…');
+  try{
+    sessionStorage.setItem('manager_lines_google_redirect_pending','1');
+    await cloudAuth.signInWithRedirect(provider);
+  }catch(e){
+    console.error('Google redirect sign-in failed',e);
+    sessionStorage.removeItem('manager_lines_google_redirect_pending');
+    cloudSetStatus('تعذر فتح تسجيل الدخول');
+    alert('تعذر بدء تسجيل الدخول بحساب Google: '+(e.message||e.code||'خطأ غير معروف'));
+  }
+}
 async function cloudSignOutV300(){if(!cloudAuth)return;if(!confirm('تسجيل الخروج من Google؟ بيانات هذا الجهاز لن تُحذف.'))return;await cloudAuth.signOut();toast('تم تسجيل الخروج — البيانات المحلية كما هي')}
 
 /* Save locally first, then schedule cloud sync. */
@@ -3438,15 +3451,28 @@ storageSet=function(k,v){_storageSetCloudBase(k,v);if(k===STORAGE_KEY)cloudSched
 const _renderMoreCloudBase=renderMore;
 renderMore=function(){const r=_renderMoreCloudBase.apply(this,arguments),grid=document.querySelector('#page-more .settings-grid');if(grid&&!grid.querySelector('.cloud-card-v300'))grid.insertAdjacentHTML('afterbegin',cloudCardHtmlV300());cloudInstallTopButton();return r};window.renderMore=renderMore;
 
-function cloudStampV300(){document.title='مدير الخطوط الجديد V3.0 Cloud';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],[id^="v3"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v300Badge" class="v26-version">V3.0 ☁️</span>')}cloudInstallTopButton()}
+function cloudStampV300(){document.title='مدير الخطوط الجديد V3.0.1 Cloud';const h=document.querySelector('.brand h1');if(h){h.querySelectorAll('[id^="v2"],[id^="v3"],.v24-version,.v26-version').forEach(x=>x.remove());for(const n of [...h.childNodes])if(n.nodeType===3)n.remove();h.insertAdjacentText('afterbegin','مدير الخطوط الجديد ');h.insertAdjacentHTML('beforeend','<span id="v300Badge" class="v26-version">V3.0.1 ☁️</span>')}cloudInstallTopButton()}
 
 try{
-  if(!window.firebase)throw new Error('Firebase SDK لم يتم تحميله');if(!firebase.apps.length)firebase.initializeApp(CLOUD_CONFIG);cloudAuth=firebase.auth();cloudDb=firebase.firestore();cloudAuth.useDeviceLanguage();cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});cloudAuth.onAuthStateChanged(u=>{if(u)cloudAfterLoginV300(u);else{cloudUser=null;cloudReady=false;cloudLastHash='';if(cloudUnsub){cloudUnsub();cloudUnsub=null}cloudSetStatus('غير متصل')}});
+  if(!window.firebase)throw new Error('Firebase SDK لم يتم تحميله');
+  if(!firebase.apps.length)firebase.initializeApp(CLOUD_CONFIG);
+  cloudAuth=firebase.auth();cloudDb=firebase.firestore();cloudAuth.useDeviceLanguage();
+  cloudAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+  cloudAuth.getRedirectResult().then(result=>{
+    sessionStorage.removeItem('manager_lines_google_redirect_pending');
+    if(result&&result.user)cloudSetStatus('تم تسجيل الدخول ✅');
+  }).catch(e=>{
+    console.error('Google redirect result failed',e);
+    sessionStorage.removeItem('manager_lines_google_redirect_pending');
+    cloudSetStatus('تعذر إكمال تسجيل الدخول');
+    setTimeout(()=>alert('تعذر إكمال تسجيل الدخول بحساب Google: '+(e.message||e.code||'خطأ غير معروف')),150);
+  });
+  cloudAuth.onAuthStateChanged(u=>{if(u)cloudAfterLoginV300(u);else{cloudUser=null;cloudReady=false;cloudLastHash='';if(cloudUnsub){cloudUnsub();cloudUnsub=null}cloudSetStatus('غير متصل')}});
   state.settings=state.settings||{};state.settings.appVersion=CLOUD_APP_VERSION;state.schemaVersion=Math.max(Number(state.schemaVersion||1),11);_storageSetCloudBase(STORAGE_KEY,JSON.stringify(state));cloudStampV300();renderAll();setTimeout(cloudInstallTopButton,100);
 }catch(e){console.error('Firebase init failed',e);cloudStatus='تعذر تحميل خدمة Google';cloudStampV300();renderAll()}
 
 window.cloudGoogleSignInV300=cloudGoogleSignInV300;window.cloudSignOutV300=cloudSignOutV300;window.cloudSyncNowV300=cloudSyncNowV300;window.cloudDownloadConfirmV300=cloudDownloadConfirmV300;window.cloudUploadConfirmV300=cloudUploadConfirmV300;window.cloudUploadCurrentV300=cloudUploadCurrentV300;window.cloudUsePackV300=cloudUsePackV300;window.cloudOpenPanelV300=cloudOpenPanelV300;
-console.info('Manager Lines V3.0 Cloud active');
+console.info('Manager Lines V3.0.1 Cloud redirect auth active');
 })();
 </script>
 
